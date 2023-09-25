@@ -34,3 +34,4 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   test_shopify_integration:
     +materialized: table
+    
