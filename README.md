@@ -1,11 +1,6 @@
-Welcome to your new dbt project!
+## First dbt project
 
-### Using the starter project
-
-Try running the following commands:
-- dbt run
-- dbt test
-
+### Goal: Transform and ingest Shopify API data into Snowflake
 
 ### Resources:
 - Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
@@ -13,3 +8,5 @@ Try running the following commands:
 - Join the [dbt community](http://community.getbdt.com/) to learn from other analytics engineers
 - Find [dbt events](https://events.getdbt.com) near you
 - Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+
+
