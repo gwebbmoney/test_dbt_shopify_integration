@@ -1,0 +1,9 @@
+version: 2 
+
+sources:
+  - name: raw_infotrax
+    database: fivetran_infotrax_raw_data
+    schema: sql_server_dbo
+    tables:
+    - name: ORDERMASTER
+    - name: ORDERPAYMENTS

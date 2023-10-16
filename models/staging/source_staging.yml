@@ -1,0 +1,18 @@
+version: 2
+    
+sources:
+  - name: shopify_raw
+    database: fivetran_shopify_raw_data
+    schema: shopify
+    tables:
+      - name: "\"ORDER\""
+      - name: TRANSACTION
+      - name: ORDER_LINE
+      - name: ORDER_LINE_REFUND
+      - name: ORDER_DISCOUNT_CODE
+      - name: ORDER_SHIPPING_LINE
+      - name: ORDER_ADJUSTMENT
+      - name: METAFIELD
+      - name: CUSTOMER
+      - name: CUSTOMER_ADDRESS
+
