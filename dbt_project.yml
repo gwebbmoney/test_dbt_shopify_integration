@@ -32,6 +32,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 models:
   test_shopify_integration:
-    +materialized: table
+    +materialized: view
 
     
