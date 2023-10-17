@@ -45,4 +45,4 @@ SELECT id,
     SPLIT_PART(SPLIT_PART(note, '\n', 3), ':', 2) AS Infotrax_Order_Number,
     _fivetran_deleted,
     _fivetran_synced
-FROM source;
+FROM source
