@@ -31,7 +31,7 @@ SELECT
     discount_percent,
     email_address,
     language,
-    last_update_time,
+    last_update_time AS updated_at,
     ship_to_addr_1,
     ship_to_addr_2,
     ship_to_city,
