@@ -43,5 +43,5 @@ SELECT
     distributor_id,
     original_order as infotrax_original_order,
     _fivetran_deleted
-FROM DATA_MANAGEMENT.STREAMS.orders_stream
+FROM {{ source('raw_infotrax', 'ORDERMASTER') }}
 WHERE entry_date >= '2020-01-01'
