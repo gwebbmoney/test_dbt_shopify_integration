@@ -5,5 +5,11 @@ sources:
     database: fivetran_infotrax_raw_data
     schema: sql_server_dbo
     tables:
-    - name: ORDERMASTER
-    - name: ORDERPAYMENTS
+      - name: ORDERMASTER
+      - name: ORDERPAYMENTS
+
+  - name: redaspen_data
+    database: redaspen
+    schema: orders
+    tables:
+      - name: ORDERS
