@@ -46,7 +46,7 @@ order_integration AS(SELECT infotrax_order_number,
     distributor_status
 FROM orders_comb oc
 )
-SELECT infotrax_order_number,
+SELECT infotrax_order_number AS ORDER_NUMBER,
     retail_amount_cents,
     sales_tax_cents,
     discount_amount_cents,
