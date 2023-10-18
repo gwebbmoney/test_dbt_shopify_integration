@@ -1,9 +1,9 @@
 WITH sales_information AS(SELECT *
-                    FROM {{ source('redaspen_data', 'ORDERS') }}
+                    FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE <> 904
 ),
 refund_information AS(SELECT *
-                    FROM {{ source('redaspen_data', 'ORDERS') }}
+                    FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE = 904
 ),
 orders_comb AS(SELECT si.*,
@@ -46,15 +46,15 @@ order_integration AS(SELECT infotrax_order_number,
     distributor_status
 FROM orders_comb oc
 )
-SELECT infotrax_order_number AS ORDER_NUMBER,
-    retail_amount_cents,
-    sales_tax_cents,
-    discount_amount_cents,
-    freight_amount_cents,
-    total_invoice_cents,
+SELECT infotrax_order_number AS order_number,
+    retail_amount_cents AS subtotal_amount_cents,
+    sales_tax_cents AS sales_tax_amount_cents,
+    discount_amount_cents AS total_discount_amount_cents,
+    freight_amount_cents AS total_shipping_amount_cents,
+    total_invoice_cents AS order_invoice_amount_cents,
     bonus_period,
-    entered_at,
-    posted_at,
+    entered_at AS created_at,
+    posted_at AS processed_at,
     updated_at,
     (CASE 
         WHEN order_source = 904 AND total_order_amount_cents = 0 THEN 'refunded'
@@ -66,26 +66,26 @@ SELECT infotrax_order_number AS ORDER_NUMBER,
         WHEN oi.order_status = 9 THEN 'cancelled'
         ELSE 'fulfilled'
      END) AS fulfillment_status,
-    refund_subtotal_amount,
-    refund_discount_amount,
-    refund_sales_tax_amount,
-    refund_freight_amount,
-    refund_invoice_amount,
-    total_order_amount_cents,
-    ship_to_name,
-    ship_to_addr_1,
-    ship_to_addr_2,
-    ship_to_city,
-    ship_to_state,
-    ship_to_zip,
-    odp.billing_first_name,
-    odp.billing_last_name,
-    odp.credit_card_name,
-    odp.billing_addr1,
-    odp.billing_addr2,
-    odp.billing_city,
-    odp.billing_state,
-    odp.billing_zip,
-    distributor_id,
+    refund_subtotal_amount AS subtotal_refund_cents,
+    refund_discount_amount AS discount_refund_cents,
+    refund_sales_tax_amount AS tax_refund_cents,
+    refund_freight_amount AS shipping_refund_cents,
+    refund_invoice_amount AS order_refund_amount_cents,
+    total_order_amount_cents AS total_order_amount_cents,
+    ship_to_name AS shipping_address_name,
+    ship_to_addr_1 AS shipping_address_one,
+    ship_to_addr_2 AS shipping_address_two,
+    ship_to_city AS shipping_address_city,
+    ship_to_state AS shipping_address_state,
+    ship_to_zip AS shipping_address_zip,
+    odp.billing_first_name AS billing_address_first_name,
+    odp.billing_last_name AS billing_address_last_name,
+    odp.credit_card_name AS billing_address_name,
+    odp.billing_addr1 AS billing_address_one, 
+    odp.billing_addr2 AS billing_address_two,
+    odp.billing_city AS billing_address_city,
+    odp.billing_state AS billing_address_state,
+    odp.billing_zip AS billing_address_zip,
+    distributor_id AS brandambassadorid,
     distributor_status
 FROM order_integration oi LEFT JOIN {{ source('raw_infotrax', 'ORDERPAYMENTS') }} odp ON oi.infotrax_order_number = odp.order_number
