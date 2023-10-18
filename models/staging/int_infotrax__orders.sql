@@ -1,9 +1,9 @@
 WITH sales_information AS(SELECT *
-                    FROM {{ source('redaspen_data', 'ORDERS') }}
+                    FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE <> 904
 ),
 refund_information AS(SELECT *
-                    FROM {{ source('redaspen_data', 'ORDERS') }}
+                    FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE = 904
 ),
 orders_comb AS(SELECT si.*,
