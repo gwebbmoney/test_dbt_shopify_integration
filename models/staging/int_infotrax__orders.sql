@@ -80,4 +80,4 @@ SELECT infotrax_order_number AS order_id,
     ship_to_zip AS shipping_address_zip,
     distributor_id AS brandambassadorid,
     distributor_status
-FROM order_integration oi LEFT JOIN {{ source('raw_infotrax', 'ORDERPAYMENTS') }} odp ON oi.infotrax_order_number = odp.order_number
+FROM order_integration oi
