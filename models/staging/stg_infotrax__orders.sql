@@ -45,3 +45,4 @@ SELECT
     _fivetran_deleted
 FROM {{ source('raw_infotrax', 'ORDERMASTER') }}
 WHERE entry_date >= '2020-01-01'
+    AND _fivetran_deleted = FALSE
