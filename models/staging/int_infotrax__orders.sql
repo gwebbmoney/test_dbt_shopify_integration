@@ -46,7 +46,7 @@ order_integration AS(SELECT infotrax_order_number,
     distributor_status
 FROM orders_comb oc
 )
-SELECT infotrax_order_number AS order_number,
+SELECT infotrax_order_number AS order_id,
     retail_amount_cents AS subtotal_amount_cents,
     sales_tax_cents AS sales_tax_amount_cents,
     discount_amount_cents AS total_discount_amount_cents,
@@ -78,14 +78,6 @@ SELECT infotrax_order_number AS order_number,
     ship_to_city AS shipping_address_city,
     ship_to_state AS shipping_address_state,
     ship_to_zip AS shipping_address_zip,
-    odp.billing_first_name AS billing_address_first_name,
-    odp.billing_last_name AS billing_address_last_name,
-    odp.credit_card_name AS billing_address_name,
-    odp.billing_addr1 AS billing_address_one, 
-    odp.billing_addr2 AS billing_address_two,
-    odp.billing_city AS billing_address_city,
-    odp.billing_state AS billing_address_state,
-    odp.billing_zip AS billing_address_zip,
     distributor_id AS brandambassadorid,
     distributor_status
-FROM order_integration oi LEFT JOIN {{ source('raw_infotrax', 'ORDERPAYMENTS') }} odp ON oi.infotrax_order_number = odp.order_number
+FROM order_integration oi
