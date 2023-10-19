@@ -15,6 +15,7 @@ sources:
       - name: ORDER_ADJUSTMENT
       - name: TAX_LINE
       - name: METAFIELD
+      - name: REFUND
       - name: CUSTOMER
       - name: CUSTOMER_ADDRESS
 
