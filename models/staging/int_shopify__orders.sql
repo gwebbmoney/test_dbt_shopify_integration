@@ -106,6 +106,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     sta.shipping_tax_amount*100 AS shipping_tax_amount_cents,
     od.total_discount_amount*100 AS total_discount_amount_cents,
     oi.order_invoice*100 AS order_invoice_amount_cents,
+    DATE_TRUNC('month', o.created_at::date) AS bonus_period,
     o.created_at,
     o.processed_at,
     o.cancelled_at,
@@ -164,7 +165,8 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
-WHERE _fivetran_deleted = FALSE
+WHERE o._fivetran_deleted = FALSE
+--AND o.test = FALSE
 
 
 
