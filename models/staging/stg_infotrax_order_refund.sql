@@ -16,7 +16,7 @@ order_refund AS(SELECT si.*,
     ri.entered_at::timestamp_ntz AS refunded_at,
     ri.posted_at::timestamp_ntz AS processed_at,
     ri.bonus_period AS refund_bonus_period,
-    ri.order_source AS refund_order_source
+    ri.order_source AS refund_order_status
 FROM sales_information si LEFT JOIN refund_information ri ON si.infotrax_order_number = ri.infotrax_original_order
 )
 SELECT *
