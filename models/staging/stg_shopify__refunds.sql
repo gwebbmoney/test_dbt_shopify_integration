@@ -11,7 +11,7 @@ transactions AS(SELECT id,
                 refund_id,
                 amount*100 AS refund_amount_cents,
                 created_at::timestamp_ntz AS refunded_at,
-                processed_at::timestamp_ntz
+                processed_at::timestamp_ntz AS processed_at
             FROM {{ source('shopify_raw', 'TRANSACTION') }}
             WHERE kind = 'refund'
                 AND status = 'success'
@@ -21,7 +21,7 @@ SELECT t.order_id,
     r.id AS refund_id,
     t.refunded_at,
     t.processed_at,
-    DATE_TRUNC('month', t.created_at::date) AS bonus_period,
+    DATE_TRUNC('month', t.refunded_at::date) AS bonus_period,
     t.refund_amount_cents,
     r.note,
     r.restock
