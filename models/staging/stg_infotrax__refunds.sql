@@ -4,6 +4,6 @@ WITH order_refund AS(
 SELECT infotrax_order_number,
     refunded_at,
     processed_at,
-    bonus_period,
+    refund_bonus_period AS bonus_period,
     refund_invoice_amount AS refund_amount_cents
 FROM order_refund
