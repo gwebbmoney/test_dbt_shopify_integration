@@ -97,8 +97,8 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         END) AS order_adjustment_tax_amount
                     FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_ADJUSTMENT oa RIGHT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o ON oa.order_id = o.id
                     GROUP BY o.id
-),
-option_two_part_two AS(SELECT DISTINCT(oi.id) AS order_id,
+)
+SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
     olc.line_item_subtotal*100 AS subtotal_amount_cents,
     tlc.total_tax_amount*100 AS sales_tax_amount_cents,
