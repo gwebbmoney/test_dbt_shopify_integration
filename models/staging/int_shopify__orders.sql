@@ -95,7 +95,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                             WHEN SUM(tax_amount) IS NULL THEN 0
                             ELSE SUM(amount)
                         END) AS order_adjustment_tax_amount
-                    FROM{{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
+                    FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     GROUP BY o.id
 )
 SELECT DISTINCT(oi.id) AS order_id,
@@ -164,6 +164,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
+WHERE _fivetran_deleted = FALSE
 
 
 
