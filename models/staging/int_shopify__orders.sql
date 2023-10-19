@@ -1,13 +1,13 @@
 WITH sale_transactions AS(SELECT DISTINCT(order_id),
                             SUM(amount) AS total_sale_transaction
-                        FROM {{ source('shopify_raw', 'TRANSACTION') }}
+                        FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.TRANSACTION
                         WHERE status = 'success'
                             AND kind = 'sale'
                         GROUP BY order_id
 ),
 refund_transactions AS(SELECT DISTINCT(order_id),
                             SUM(amount) AS total_refund_transaction
-                        FROM {{ source('shopify_raw', 'TRANSACTION') }}
+                        FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.TRANSACTION
                         WHERE status = 'success'
                             AND kind = 'refund'
                         GROUP BY order_id
@@ -21,7 +21,7 @@ order_transaction AS(SELECT DISTINCT(o.id),
                             WHEN rt.total_refund_transaction IS NULL THEN 0
                             ELSE rt.total_refund_transaction
                         END) AS order_refund
-                    FROM {{ source('shopify_raw', '"ORDER"')}} o LEFT JOIN sale_transactions st ON o.id = st.order_id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o LEFT JOIN sale_transactions st ON o.id = st.order_id
                     LEFT JOIN refund_transactions rt ON o.id = rt.order_id
 ),
 order_invoice AS(SELECT DISTINCT(o.id),
@@ -29,14 +29,14 @@ order_invoice AS(SELECT DISTINCT(o.id),
                     o.financial_status,
                     ot.order_invoice,
                     ot.order_refund
-                FROM order_transaction ot RIGHT JOIN {{ source('shopify_raw', '"ORDER"')}} o ON ot.id = o.id                
+                FROM order_transaction ot RIGHT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o ON ot.id = o.id                
 ),
 order_line_cond AS(SELECT DISTINCT(o.id),
                         (CASE
                             WHEN SUM(price * quantity - total_discount) IS NULL THEN 0
                             ELSE SUM(price * quantity - total_discount)
                         END)AS line_item_subtotal
-                    FROM {{ source('shopify_raw', '"ORDER"')}} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_LINE ol ON o.id = ol.order_id
                     GROUP BY o.id
 ),
 order_line_refund_cond AS(SELECT DISTINCT(o.id),
@@ -48,8 +48,8 @@ order_line_refund_cond AS(SELECT DISTINCT(o.id),
                             WHEN SUM(olr.total_tax) IS NULL THEN 0
                             ELSE SUM(olr.total_tax)
                         END) AS total_tax_refund
-                    FROM {{ source('shopify_raw', '"ORDER"')}} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
-                    LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE_REFUND') }} olr ON ol.id = olr.order_line_id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_LINE ol ON o.id = ol.order_id
+                    LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_LINE_REFUND olr ON ol.id = olr.order_line_id
                     GROUP BY o.id
 ),
 order_discount AS(SELECT DISTINCT(o.id),
@@ -57,7 +57,7 @@ order_discount AS(SELECT DISTINCT(o.id),
                         WHEN SUM(amount) IS NULL THEN 0
                         ELSE SUM(amount)
                     END) AS total_discount_amount
-                    FROM {{ source('shopify_raw', 'ORDER_DISCOUNT_CODE') }} odc RIGHT JOIN {{ source('shopify_raw', '"ORDER"')}} o ON odc.order_id = o.id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_DISCOUNT_CODE odc RIGHT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o ON odc.order_id = o.id
                     GROUP BY o.id
 ),
 shipping_amount AS(SELECT DISTINCT(o.id),
@@ -65,7 +65,7 @@ shipping_amount AS(SELECT DISTINCT(o.id),
                             WHEN SUM(osl.discounted_price) IS NULL THEN 0
                             ELSE SUM(osl.discounted_price)
                         END) AS total_shipping_amount
-                    FROM {{ source('shopify_raw', '"ORDER"')}} o LEFT JOIN {{ source('shopify_raw', 'ORDER_SHIPPING_LINE') }} osl ON o.id = osl.order_id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_SHIPPING_LINE osl ON o.id = osl.order_id
                     GROUP BY o.id
 ),
 shipping_tax_amount AS(SELECT DISTINCT(o.id),
@@ -73,8 +73,8 @@ shipping_tax_amount AS(SELECT DISTINCT(o.id),
                             WHEN SUM(ostl.price) IS NULL THEN 0
                             ELSE SUM(ostl.price)
                         END) AS shipping_tax_amount
-                    FROM {{ source('shopify_raw', '"ORDER"')}} o LEFT JOIN {{ source('shopify_raw', 'ORDER_SHIPPING_LINE') }} osl ON o.id = osl.order_id
-                        LEFT JOIN {{source('shopify_raw', 'ORDER_SHIPPING_TAX_LINE')}} ostl ON osl.id = ostl.order_shipping_line_id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_SHIPPING_LINE osl ON o.id = osl.order_id
+                        LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_SHIPPING_TAX_LINE ostl ON osl.id = ostl.order_shipping_line_id
                     GROUP BY o.id
 ),
 tax_lines_cond AS(SELECT DISTINCT(o.id),
@@ -82,8 +82,8 @@ tax_lines_cond AS(SELECT DISTINCT(o.id),
                         WHEN SUM(tl.price) IS NULL THEN 0
                         ELSE SUM(tl.price)
                     END) AS total_tax_amount
-                FROM {{ source("shopify_raw", '"ORDER"')}} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
-                    LEFT JOIN {{ source('shopify_raw', 'TAX_LINE')}} tl ON ol.id = tl.order_line_id
+                FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_LINE ol ON o.id = ol.order_id
+                    LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.TAX_LINE tl ON ol.id = tl.order_line_id
                 GROUP BY o.id
 ),
 order_adjustment_cond AS(SELECT DISTINCT(o.id),
@@ -95,7 +95,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                             WHEN SUM(tax_amount) IS NULL THEN 0
                             ELSE SUM(amount)
                         END) AS order_adjustment_tax_amount
-                    FROM {{ source('shopify_raw', "ORDER_ADJUSTMENT") }} oa RIGHT JOIN {{ source("shopify_raw", '"ORDER"')}} o ON oa.order_id = o.id
+                    FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.ORDER_ADJUSTMENT oa RIGHT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o ON oa.order_id = o.id
                     GROUP BY o.id
 ),
 option_two_part_two AS(SELECT DISTINCT(oi.id) AS order_id,
@@ -146,8 +146,14 @@ option_two_part_two AS(SELECT DISTINCT(oi.id) AS order_id,
     o.referring_site,
     o.app_id,
     o.buyer_accepts_marketing,
-    o.note,
+    REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"BrandAmbassadorID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS brandambassadorid,
+    REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"PartyID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS partyid,
+    REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"HostID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS hostid,
+    REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"dateOfBirth"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS dateofbirth,
     o.note_attributes,
+    --Edit the splits once I find out more information on how notes/comments are inputted
+    SPLIT_PART(SPLIT_PART(o.note, '\n', 2), ':', 2) AS sphere_order_number_reference,
+    SPLIT_PART(SPLIT_PART(o.note, '\n', 3), ':', 2) AS infotrax_order_number_reference,
     o._fivetran_deleted,
     o._fivetran_synced
 FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id 
@@ -157,11 +163,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN shipping_amount sa ON oi.id = sa.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
-    LEFT JOIN {{ source("shopify_raw", '"ORDER"')}} o ON oi.id = o.id
-)
-SELECT ot.*
-FROM option_two_part_two ot
-ORDER BY ORDER_NUMBER
+    LEFT JOIN FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY."ORDER" o ON oi.id = o.id
 
 
 
