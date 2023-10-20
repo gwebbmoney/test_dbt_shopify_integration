@@ -22,4 +22,5 @@ sources:
       - name: REFUND
       - name: CUSTOMER
       - name: CUSTOMER_ADDRESS
+      - name: PRODUCT_TAG
 
