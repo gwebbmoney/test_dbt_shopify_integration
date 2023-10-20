@@ -15,7 +15,6 @@ sources:
       - name: ORDER_ADJUSTMENT
       - name: PRICE_RULE
       - name: DISCOUNT_CODE 
-      - name: ORDER_DISCOUNT_CODE
       - name: TAX_LINE
       - name: METAFIELD
       - name: REFUND
