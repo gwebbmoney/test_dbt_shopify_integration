@@ -92,6 +92,10 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                             WHEN kind = 'shipping_refund' THEN SUM(amount)
                         END) AS shipping_refund,
                         (CASE
+                            WHEN SUM(tax_amount) IS NULL THEN 0
+                            WHEN kind = 'shipping_refund' THEN SUM(tax_amount) 
+                        END) AS shipping_tax_refund,
+                        (CASE
                             WHEN SUM(amount) IS NULL THEN 0
                             WHEN kind <> 'shipping_refund' THEN SUM(amount)
                         END) AS order_adjustment_amount,
@@ -100,7 +104,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                             ELSE SUM(amount)
                         END) AS order_adjustment_tax_amount
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
-                    GROUP BY o.id
+                    GROUP BY o.id, kind
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -121,6 +125,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     orf.subtotal_refund*100 AS subtotal_refund_cents,
     orf.total_tax_refund*100 AS sales_tax_refund_cents,
     oac.shipping_refund*100 AS shipping_refund_cents,
+    oac.shipping_tax_refund*100 AS shipping_tax_refund_cents,
     oac.order_adjustment_amount*100 AS order_adjustment_amount_cents,
     oac.order_adjustment_tax_amount*100 AS order_adjustment_tax_amount_cents,
     oi.order_refund*100 AS order_refund_amount_cents,
