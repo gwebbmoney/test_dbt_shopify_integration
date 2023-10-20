@@ -33,7 +33,5 @@ SELECT dc.id AS discount_code_id,
     prerequisite_quantity_range,
     prerequisite_shipping_price_range,
     pr.value_type,
-    pr.value*100 AS value_cents,
-    dc.usage_count AS order_count --Maybe don't include this, but keep for now
+    pr.value*100 AS value_cents
 FROM price_rule pr JOIN discount_code dc ON pr.id = dc.price_rule_id
-);
