@@ -14,6 +14,8 @@ sources:
       - name: ORDER_SHIPPING_TAX_LINE
       - name: ORDER_ADJUSTMENT
       - name: PRICE_RULE
+      - name: PRODUCT
+      - name: PRODUCT_VARIANT
       - name: DISCOUNT_CODE 
       - name: TAX_LINE
       - name: METAFIELD
