@@ -19,7 +19,7 @@ product_variant AS(
     FROM {{ source('shopify_raw', 'PRODUCT_VARIANT') }}
 )
 SELECT pv.product_variant_id,
-    p.product_variant_title,
+    pv.product_variant_title,
     p.product_id,
     p.product_title,
     p.product_type,
