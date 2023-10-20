@@ -89,12 +89,16 @@ tax_lines_cond AS(SELECT DISTINCT(o.id),
 order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         (CASE
                             WHEN SUM(amount) IS NULL THEN 0
-                            ELSE SUM(amount)
-                        END)AS order_adjustment_amount,
+                            WHEN kind = 'shipping_refund' THEN SUM(amount)
+                        END) AS shipping_refund,
+                        (CASE
+                            WHEN SUM(amount) IS NULL THEN 0
+                            WHEN kind <> 'shipping_refund' THEN SUM(amount)
+                        END) AS order_adjustment_amount,
                         (CASE
                             WHEN SUM(tax_amount) IS NULL THEN 0
                             ELSE SUM(amount)
-                        END) AS order_adjustment_tax_amount
+                        END) AS order_adjustment_tax_amount,
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     GROUP BY o.id
 )
@@ -115,7 +119,8 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.financial_status,
     o.fulfillment_status,
     orf.subtotal_refund*100 AS subtotal_refund_cents,
-    orf.total_tax_refund*100 AS tax_refund_cents,
+    orf.total_tax_refund*100 AS sales_tax_refund_cents,
+    oac.shipping_refund*100 AS shipping_refund_cents,
     oac.order_adjustment_amount*100 AS order_adjustment_amount_cents,
     oac.order_adjustment_tax_amount*100 AS order_adjustment_tax_amount_cents,
     oi.order_refund*100 AS order_refund_amount_cents,
