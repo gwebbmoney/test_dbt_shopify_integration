@@ -39,7 +39,7 @@ SELECT
     ship_to_name,
     ship_to_phone,
     ship_to_state,
-    ship_to_zip,
+    ship_to_zip, 
     distributor_id,
     original_order as infotrax_original_order,
     _fivetran_deleted

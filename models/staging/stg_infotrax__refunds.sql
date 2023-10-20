@@ -1,7 +1,7 @@
 WITH order_refund AS(
     SELECT * FROM {{ ref("stg_infotrax_order_refund") }}
 )
-SELECT infotrax_order_number,
+SELECT infotrax_order_number AS order_id,
     refunded_at,
     processed_at,
     refund_bonus_period AS bonus_period,
