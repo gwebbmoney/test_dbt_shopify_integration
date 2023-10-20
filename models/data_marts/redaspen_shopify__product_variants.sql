@@ -34,7 +34,7 @@ SELECT pv.product_variant_id,
     pv.option_1,
     pv.option_2,
     pv.option_3
-FROM product p JOIN product_variant pv ON p.product_id = pv.product_id
+FROM products p JOIN product_variant pv ON p.product_id = pv.product_id
 
 
 
