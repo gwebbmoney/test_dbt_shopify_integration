@@ -18,7 +18,7 @@ product_variants AS(
     pv.option_1,
     pv.option_2,
     pv.option_3
-    FROM products p JOIN {{ source('shopify_raw', 'PRODUCT_VARIANT') pv }} ON p.id = pv.product_id
+    FROM products p JOIN {{ source('shopify_raw', 'PRODUCT_VARIANT') }} pv ON p.id = pv.product_id
 )
 SELECT pv.*
 FROM product_variants pv LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON pv.product_id = bv.bundle_id
