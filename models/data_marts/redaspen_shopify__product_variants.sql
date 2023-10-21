@@ -41,3 +41,10 @@ FROM products p JOIN product_variant pv ON p.product_id = pv.product_id
 
 
 
+
+
+
+
+
+
+
