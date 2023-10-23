@@ -21,6 +21,8 @@ sources:
       - name: METAFIELD
       - name: REFUND
       - name: CUSTOMER
+      - name: COLLECTION
+      - name: CUSTOMER_TAG
       - name: CUSTOMER_ADDRESS
       - name: PRODUCT_TAG
 
