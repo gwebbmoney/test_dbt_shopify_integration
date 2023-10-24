@@ -6,3 +6,9 @@ sources:
     schema: sql_server_dbo
     tables:
       - name: ORDERMASTER
+
+  - name: redaspen
+    database: redaspen
+    schema: distributors
+    tables:
+      - name: DISTRIBUTORS
