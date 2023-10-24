@@ -34,8 +34,8 @@ SELECT c.id AS customer_id,
         WHEN ct.value = 'Affiliate' THEN value
         WHEN ct.value = 'former_partner' THEN value
     END) as shopify_distributor_status,
-    cd.distributor_id,
-    cd.sponsor_id,
+    cd.distributor_id AS brandambassadorid,
+    cd.sponsor_id AS mentorid,
     cd.distributor_status,
     c.note,
     c.verified_email,
@@ -48,4 +48,4 @@ SELECT c.id AS customer_id,
 FROM {{ source('shopify_raw', 'CUSTOMER') }} c LEFT JOIN customer_data cd ON c.id = cd.customer_id
     LEFT JOIN customer_tag ct ON c.id = ct.customer_id
 WHERE c._fivetran_deleted = FALSE
-ORDER BY c.id;
+ORDER BY c.id
