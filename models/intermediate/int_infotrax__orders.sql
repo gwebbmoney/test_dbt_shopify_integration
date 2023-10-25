@@ -52,7 +52,7 @@ refund_integration AS(
         SUM(refund_freight_amount) AS refund_freight_amount,
         SUM(refund_invoice_amount) AS refund_invoice_amount
     FROM order_integration
-    WHERE order_source <> 9
+    WHERE order_status <> 9
     GROUP BY infotrax_order_number
 )
 SELECT oi.infotrax_order_number AS order_id,
