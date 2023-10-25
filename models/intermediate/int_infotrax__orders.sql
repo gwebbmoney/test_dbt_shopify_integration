@@ -65,8 +65,8 @@ SELECT oi.infotrax_order_number AS order_id,
     posted_at AS processed_at,
     updated_at,
     (CASE 
-        WHEN order_source = 904 AND total_order_amount_cents = 0 THEN 'refunded'
-        WHEN order_source = 904 AND total_order_amount_cents > 0 THEN 'partially_refunded'
+        WHEN order_source = 904 AND (oi.total_invoice_cents - ri.refund_invoice_amount) = 0 THEN 'refunded'
+        WHEN order_source = 904 AND (oi.total_invoice_cents - ri.refund_invoice_amount) > 0 THEN 'partially_refunded'
         ELSE 'paid'
      END) AS financial_status,
     (CASE
