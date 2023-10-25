@@ -6,14 +6,25 @@ refund_information AS(SELECT *
                     FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE = 904
 ),
+refund_cond AS(SELECT ri.infotrax_original_order,
+    ri.order_source,
+    SUM(ri.retail_amount_cents) AS retail_amount_cents,
+    SUM(ri.discount_amount_cents) AS discount_amount_cents,
+    SUM(ri.sales_tax_cents) AS sales_tax_cents,
+    SUM(ri.freight_amount_cents) AS freight_amount_cents,
+    SUM(ri.total_invoice_cents) AS total_invoice_cents
+FROM refund_information ri
+WHERE order_status <> 9
+GROUP BY infotrax_original_order, ri.order_source
+),
 orders_comb AS(SELECT si.*,
-    IFNULL(ri.retail_amount_cents,0) AS refund_subtotal_amount,
-    IFNULL(ri.discount_amount_cents,0) AS refund_discount_amount,
-    IFNULL(ri.sales_tax_cents,0) AS refund_sales_tax_amount,
-    IFNULL(ri.freight_amount_cents,0) AS refund_freight_amount,
-    IFNULL(ri.total_invoice_cents,0) AS refund_invoice_amount,
-    ri.order_source AS refund_order_source
-FROM sales_information si LEFT JOIN refund_information ri ON si.infotrax_order_number = ri.infotrax_original_order
+    IFNULL(rc.retail_amount_cents,0) AS refund_subtotal_amount,
+    IFNULL(rc.discount_amount_cents,0) AS refund_discount_amount,
+    IFNULL(rc.sales_tax_cents,0) AS refund_sales_tax_amount,
+    IFNULL(rc.freight_amount_cents,0) AS refund_freight_amount,
+    IFNULL(rc.total_invoice_cents,0) AS refund_invoice_amount,
+    rc.order_source AS refund_order_source
+FROM sales_information si LEFT JOIN refund_cond rc ON si.infotrax_order_number = rc.infotrax_original_order
 ),
 order_integration AS(SELECT infotrax_order_number,
     retail_amount_cents,
@@ -43,17 +54,6 @@ order_integration AS(SELECT infotrax_order_number,
     distributor_id,
     distributor_status
 FROM orders_comb oc
-),
-refund_integration AS(
-    SELECT infotrax_order_number,
-        SUM(refund_subtotal_amount) AS refund_subtotal_amount,
-        SUM(refund_discount_amount) AS refund_discount_amount,
-        SUM(refund_sales_tax_amount) AS refund_sales_tax_amount,
-        SUM(refund_freight_amount) AS refund_freight_amount,
-        SUM(refund_invoice_amount) AS refund_invoice_amount
-    FROM order_integration
-    WHERE order_status <> 9
-    GROUP BY infotrax_order_number
 )
 SELECT oi.infotrax_order_number AS order_id,
     retail_amount_cents AS subtotal_amount_cents,
@@ -89,5 +89,5 @@ SELECT oi.infotrax_order_number AS order_id,
     ship_to_zip AS shipping_address_zip,
     distributor_id AS brandambassadorid,
     distributor_status
-FROM order_integration oi LEFT JOIN refund_integration ri ON oi.infotrax_order_number = ri.infotrax_order_number
+FROM order_integration oi
 
