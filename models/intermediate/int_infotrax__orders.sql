@@ -18,13 +18,13 @@ WHERE order_status <> 9
 GROUP BY infotrax_original_order, ri.order_source
 ),
 orders_comb AS(SELECT si.*,
-    IFNULL(ri.retail_amount_cents,0) AS refund_subtotal_amount,
-    IFNULL(ri.discount_amount_cents,0) AS refund_discount_amount,
-    IFNULL(ri.sales_tax_cents,0) AS refund_sales_tax_amount,
-    IFNULL(ri.freight_amount_cents,0) AS refund_freight_amount,
-    IFNULL(ri.total_invoice_cents,0) AS refund_invoice_amount,
-    ri.order_source AS refund_order_source
-FROM sales_information si LEFT JOIN refund_information ri ON si.infotrax_order_number = ri.infotrax_original_order
+    IFNULL(rc.retail_amount_cents,0) AS refund_subtotal_amount,
+    IFNULL(rc.discount_amount_cents,0) AS refund_discount_amount,
+    IFNULL(rc.sales_tax_cents,0) AS refund_sales_tax_amount,
+    IFNULL(rc.freight_amount_cents,0) AS refund_freight_amount,
+    IFNULL(rc.total_invoice_cents,0) AS refund_invoice_amount,
+    rc.order_source AS refund_order_source
+FROM sales_information si LEFT JOIN refund_cond rc ON si.infotrax_order_number = rc.infotrax_original_order
 ),
 order_integration AS(SELECT infotrax_order_number,
     retail_amount_cents,
