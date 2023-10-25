@@ -12,7 +12,6 @@ orders_comb AS(SELECT si.*,
     IFNULL(ri.sales_tax_cents,0) AS refund_sales_tax_amount,
     IFNULL(ri.freight_amount_cents,0) AS refund_freight_amount,
     IFNULL(ri.total_invoice_cents,0) AS refund_invoice_amount,
-    ri.entered_at AS refund_date,
     ri.order_source AS refund_order_source
 FROM sales_information si LEFT JOIN refund_information ri ON si.infotrax_order_number = ri.infotrax_original_order
 ),
@@ -35,7 +34,6 @@ order_integration AS(SELECT infotrax_order_number,
     refund_sales_tax_amount,
     refund_freight_amount,
     refund_invoice_amount,
-    (total_invoice_cents - refund_invoice_amount) AS total_order_amount_cents,
     ship_to_name,
     ship_to_addr_1,
     ship_to_addr_2,
@@ -45,6 +43,16 @@ order_integration AS(SELECT infotrax_order_number,
     distributor_id,
     distributor_status
 FROM orders_comb oc
+),
+refund_integration AS(
+    SELECT infotrax_order_number,
+        SUM(refund_subtotal_amount) AS refund_subtotal_amount,
+        SUM(refund_discount_amount) AS refund_discount_amount,
+        SUM(refund_sales_tax_amount) AS refund_sales_tax_amount,
+        SUM(refund_freight_amount) AS refund_freight_amount,
+        SUM(refund_invoice_amount) AS refund_invoice_amount
+    FROM order_integration
+    GROUP BY infotrax_order_number
 )
 SELECT infotrax_order_number AS order_id,
     retail_amount_cents AS subtotal_amount_cents,
@@ -71,7 +79,7 @@ SELECT infotrax_order_number AS order_id,
     refund_sales_tax_amount AS sales_tax_refund_cents,
     refund_freight_amount AS shipping_refund_cents,
     refund_invoice_amount AS order_refund_amount_cents,
-    total_order_amount_cents AS total_order_amount_cents,
+    (total_invoice_cents - refund_invoice_amount) AS total_order_amount_cents,
     ship_to_name AS shipping_address_name,
     ship_to_addr_1 AS shipping_address_one,
     ship_to_addr_2 AS shipping_address_two,
@@ -80,4 +88,5 @@ SELECT infotrax_order_number AS order_id,
     ship_to_zip AS shipping_address_zip,
     distributor_id AS brandambassadorid,
     distributor_status
-FROM order_integration oi
+FROM order_integration oi LEFT JOIN refund_integration ri ON oi.infotrax_order_number = ri.infotrax_order_number
+
