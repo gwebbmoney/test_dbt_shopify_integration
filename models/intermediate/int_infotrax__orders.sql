@@ -54,7 +54,7 @@ refund_integration AS(
     FROM order_integration
     GROUP BY infotrax_order_number
 )
-SELECT infotrax_order_number AS order_id,
+SELECT oi.infotrax_order_number AS order_id,
     retail_amount_cents AS subtotal_amount_cents,
     sales_tax_cents AS sales_tax_amount_cents,
     discount_amount_cents AS total_discount_amount_cents,
@@ -74,11 +74,11 @@ SELECT infotrax_order_number AS order_id,
         WHEN oi.order_status = 9 THEN 'cancelled'
         ELSE 'fulfilled'
      END) AS fulfillment_status,
-    refund_subtotal_amount AS subtotal_refund_cents,
-    refund_discount_amount AS discount_refund_cents,
-    refund_sales_tax_amount AS sales_tax_refund_cents,
-    refund_freight_amount AS shipping_refund_cents,
-    refund_invoice_amount AS order_refund_amount_cents,
+    ri.refund_subtotal_amount AS subtotal_refund_cents,
+    ri.refund_discount_amount AS discount_refund_cents,
+    ri.refund_sales_tax_amount AS sales_tax_refund_cents,
+    ri.refund_freight_amount AS shipping_refund_cents,
+    ri.refund_invoice_amount AS order_refund_amount_cents,
     (total_invoice_cents - refund_invoice_amount) AS total_order_amount_cents,
     ship_to_name AS shipping_address_name,
     ship_to_addr_1 AS shipping_address_one,
