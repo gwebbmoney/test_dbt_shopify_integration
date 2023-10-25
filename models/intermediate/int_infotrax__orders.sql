@@ -45,6 +45,7 @@ order_integration AS(SELECT infotrax_order_number,
     refund_sales_tax_amount,
     refund_freight_amount,
     refund_invoice_amount,
+    (total_invoice_amount - refund_invoice_amount) AS total_order_amount_cents
     ship_to_name,
     ship_to_addr_1,
     ship_to_addr_2,
@@ -66,8 +67,8 @@ SELECT oi.infotrax_order_number AS order_id,
     posted_at AS processed_at,
     updated_at,
     (CASE 
-        WHEN order_source = 904 AND (oi.total_invoice_cents - ri.refund_invoice_amount) = 0 THEN 'refunded'
-        WHEN order_source = 904 AND (oi.total_invoice_cents - ri.refund_invoice_amount) > 0 THEN 'partially_refunded'
+        WHEN order_source = 904 AND total_order_amount_cents = 0 THEN 'refunded'
+        WHEN order_source = 904 AND total_order_amount_cents > 0 THEN 'partially_refunded'
         ELSE 'paid'
      END) AS financial_status,
     (CASE
@@ -80,7 +81,7 @@ SELECT oi.infotrax_order_number AS order_id,
     ri.refund_sales_tax_amount AS sales_tax_refund_cents,
     ri.refund_freight_amount AS shipping_refund_cents,
     ri.refund_invoice_amount AS order_refund_amount_cents,
-    (oi.total_invoice_cents - ri.refund_invoice_amount) AS total_order_amount_cents,
+    total_order_amount_cents,
     ship_to_name AS shipping_address_name,
     ship_to_addr_1 AS shipping_address_one,
     ship_to_addr_2 AS shipping_address_two,
