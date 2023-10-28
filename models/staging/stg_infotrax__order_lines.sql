@@ -21,7 +21,7 @@ SELECT ol.id,
     ol.last_update_time as updated_at,
     ol.item_code as infotrax_sku,
     ol.flag_2 as component_status,
-    o.currency_code,
+    rio.currency_code,
     ol.promo_id,
     ol.kit_line,
     ol._FIVETRAN_DELETED
