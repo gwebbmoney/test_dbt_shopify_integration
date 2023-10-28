@@ -25,7 +25,7 @@ SELECT ol.id,
     ol.promo_id,
     ol.kit_line,
     ol._FIVETRAN_DELETED
-FROM raw_order_lines ol LEFT JOIN raw_infotrax_orders rio ON orl.order_number = rio.infotrax_order_number
+FROM raw_order_lines ol LEFT JOIN raw_infotrax_orders rio ON ol.order_number = rio.infotrax_order_number
 WHERE ol._FIVETRAN_DELETED = FALSE
 
 
