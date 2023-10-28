@@ -65,6 +65,7 @@ bundle_product_lines AS(SELECT bpo.infotrax_order_number,
         WHEN bpo.skuable_type = 'Product' AND psg.price IS NULL THEN 0
         WHEN bpo.skuable_type = 'Product' THEN psg.price
         WHEN bpo.skuable_type = 'Bundle' THEN bsg.price
+    END) AS emma_price_dollars,
     (CASE
         WHEN kit_line > 0 THEN emma_price_dollars * bpo.quantity_ordered
         WHEN kit_line = 0 THEN retail_amount_cents/100 * bpo.quantity_ordered
