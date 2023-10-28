@@ -6,9 +6,13 @@ sources:
     schema: sql_server_dbo
     tables:
       - name: ORDERMASTER
+      - name: ORDERLINES
 
   - name: redaspen
-    database: redaspen
-    schema: distributors
+    database: fivetran_emma_raw_data
+    schema: emma_heroku_postgres_public
     tables:
+      - name: SKUS
       - name: DISTRIBUTORS
+      - name: PRODUCTS
+      - name: BUNDLES

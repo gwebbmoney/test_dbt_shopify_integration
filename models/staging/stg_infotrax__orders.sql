@@ -6,7 +6,7 @@ SELECT
     price_1 * 100 as retail_amount_cents,
     price_2 * 100 as pv_qualifying_amount_cents,
     price_3 * 100 as taxable_amount_cents,
-    price_4 *100 as commissionable_volume_cents,
+    price_4 * 100 as commissionable_volume_cents,
     freight_amount * 100 as freight_amount_cents,
     distributor_status,
     order_source,
