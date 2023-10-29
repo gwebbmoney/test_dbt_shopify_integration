@@ -7,7 +7,10 @@ WITH discount_code AS(SELECT order_id,
                     FROM {{ source('shopify_raw', 'ORDER_DISCOUNT_CODE') }}
 ),
 infotrax_discounts AS(
-    SELECT infotrax_order_number AS order_id,   
+    SELECT infotrax_order_number AS order_id,
+        NULL AS index,
+        NULL AS order_discount_code,
+        NULL AS type,   
         product_name AS order_discount_name,
         retail_amount_cents AS total_discount_amount_cents
     FROM {{ ref("stg_infotrax__order_lines") }}
@@ -18,14 +21,14 @@ SELECT order_id,
     order_discount_code,
     order_discount_name,
     type,
-    total_discount_amount_cent
+    total_discount_amount_cents
 FROM discount_code
 UNION
 SELECT order_id,
-    NULL AS index,
-    NULL AS order_discount_code,
+    index,
+    order_discount_code,
     order_discount_name,
-    NULL AS type,
+    type,
     total_discount_amount_cents
 FROM infotrax_discounts
 ),
