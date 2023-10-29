@@ -15,16 +15,16 @@ discount_union AS(
 SELECT order_id,
     index,
     order_discount_code,
-    order_discount_name,
+    NULL AS order_discount_name ,
     type,
     total_discount_amount_cent
 FROM discount_code
 UNION
 SELECT order_id,
-    index,
-    order_discount_code,
+    NULL AS index,
+    NULL AS order_discount_code,
     order_discount_name,
-    type,
+    NULL AS type,
     total_discount_amount_cents
 FROM infotrax_discounts
 ),
