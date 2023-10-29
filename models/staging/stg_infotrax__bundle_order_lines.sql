@@ -40,14 +40,16 @@ WITH bundle_product_orders AS(SELECT ol.infotrax_order_number,
                     AND o.order_source <> 904
 ),
 product_suggested_price AS(SELECT p.id,
-                        p.sku,
+                        sk.name AS sku,
                         p.price
-                    FROM {{ source("redaspen", "PRODUCTS") }} p
+                    FROM {{ source("redaspen", "PRODUCTS") }} p LEFT JOIN {{ source("redaspen", "SKUS") }} sk ON p.id = sk.skuable_id
+                    WHERE sk.skuable_type = 'Product'
 ),
 bundle_suggested_price AS(SELECT b.id,
-                            b.sku,
+                            sk.name AS sku,
                             b.price
-                    FROM {{ source("redaspen", "BUNDLES") }} b
+                    FROM {{ source("redaspen", "BUNDLES") }} b LEFT JOIN {{ source("redaspen", "SKUS") }} sk ON b.id = sk.skuable_id
+                    WHERE sk.skuable_type = 'Bundle'
 ),
 bundle_product_lines AS(SELECT bpo.infotrax_order_number,
     bpo.id,
