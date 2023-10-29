@@ -10,7 +10,7 @@ product_bundle_base AS(
         p.id as product_id,
         s.id as sku_id
     FROM {{ source("redaspen", 'PRODUCTS') }} p
-        JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
+        LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
     WHERE s.skuable_type = 'Product'
     UNION
     SELECT s.name as sku,
@@ -18,7 +18,7 @@ product_bundle_base AS(
         b.id,
         s.id
     FROM {{ source("redaspen", 'BUNDLES') }} b
-        JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
+        LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
     WHERE s.skuable_type = 'Bundle'
 )
 SELECT ol.id,
