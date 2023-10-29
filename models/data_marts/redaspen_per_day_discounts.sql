@@ -7,3 +7,5 @@ SELECT date_part AS day,
     dpo.distributor_status,
     COALESCE(SUM(dpo.total_discount_amount_cents), 0) AS total_discount_amount_cents
 FROM days d LEFT JOIN {{ ref("redaspen_discount_and_promotion_orders") }} dpo ON d.date_part = dpo.created_at::date
+GROUP BY day, dpo.distributor_status
+ORDER BY day
