@@ -34,10 +34,12 @@ FROM infotrax_discounts
 ),
 orders AS(SELECT order_id,
             total_discount_amount_cents,
+            distributor_status,
             created_at
         FROM {{ ref("redaspen_processed_orders") }}
 )
 SELECT du.*,
+    o.distributor_status,
     o.created_at
 FROM orders o LEFT JOIN discount_union du ON o.order_id = du.order_id
 WHERE du.total_discount_amount_cents > 0
