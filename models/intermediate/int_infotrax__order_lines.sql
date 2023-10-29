@@ -73,4 +73,4 @@ SELECT id AS order_line_id,
     END) AS pre_tax_price_cents,
     (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents
 FROM product_order_line
-ORDER BY infotrax_order_number, order_line;
+ORDER BY infotrax_order_number, order_line
