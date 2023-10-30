@@ -1,2 +1,2 @@
 SELECT *
-FROM {{ source('redaspen', 'DISTRIBUTORS') }}
+FROM {{ source('raw_infotrax', 'DISTRIBUTORS') }}

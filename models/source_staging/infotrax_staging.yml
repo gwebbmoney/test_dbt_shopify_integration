@@ -7,6 +7,7 @@ sources:
     tables:
       - name: ORDERMASTER
       - name: ORDERLINES
+      - name: DISTRIBUTORS
 
   - name: redaspen
     database: fivetran_emma_raw_data
