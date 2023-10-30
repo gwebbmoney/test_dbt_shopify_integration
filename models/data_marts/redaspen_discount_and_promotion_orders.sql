@@ -14,6 +14,7 @@ infotrax_discounts AS(
         product_name AS order_discount_name,
         retail_amount_cents AS total_discount_amount_cents
     FROM {{ ref("stg_infotrax__order_lines") }}
+    WHERE infotrax_sku = 'Discount'
 ),
 discount_union AS(
 SELECT order_id,
