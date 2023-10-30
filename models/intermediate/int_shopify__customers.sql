@@ -34,8 +34,8 @@ SELECT c.id AS customer_id,
         WHEN ct.value = 'Affiliate' THEN value
         WHEN ct.value = 'former_partner' THEN value
     END) as shopify_distributor_status,
-    cd.distributor_id AS brandambassadorid,
-    cd.sponsor_id AS mentorid,
+    cd.distributor_id AS brand_ambassador_id,
+    cd.sponsor_id AS sponsor_id,
     cd.distributor_status,
     c.note,
     c.verified_email,
