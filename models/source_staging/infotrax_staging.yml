@@ -14,6 +14,5 @@ sources:
     schema: emma_heroku_postgres_public
     tables:
       - name: SKUS
-      - name: DISTRIBUTORS
       - name: PRODUCTS
       - name: BUNDLES
