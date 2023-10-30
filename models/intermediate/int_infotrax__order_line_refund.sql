@@ -56,7 +56,7 @@ FROM order_lines_cond olc LEFT JOIN bundle_properties bp ON olc.id = bp.order_li
 WHERE olc.component_status NOT IN ('M', 'P')
 )
 SELECT id AS order_line_id,
-    infotrax_original_order, AS order_id,
+    infotrax_original_order AS order_id,
     product_id,
     product_name,
     infotrax_sku AS sku,
