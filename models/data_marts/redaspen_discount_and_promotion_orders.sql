@@ -12,7 +12,7 @@ infotrax_discounts AS(
         NULL AS order_discount_code,
         NULL AS type,   
         product_name AS order_discount_name,
-        retail_amount_cents AS total_discount_amount_cents
+        (retail_amount_cents * -1) AS total_discount_amount_cents
     FROM {{ ref("stg_infotrax__order_lines") }}
     WHERE infotrax_sku = 'Discount'
 ),
