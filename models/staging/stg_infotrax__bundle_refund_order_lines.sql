@@ -175,6 +175,7 @@ product_pricing_percentages AS(SELECT bop.infotrax_order_number,
                             AND pa.order_line = bop.order_line
 ),
 bundle_order_lines AS(SELECT bpl.infotrax_order_number,
+    bpl.infotrax_original_order,
     bpl.id AS order_line_id,
     bpl.product_name,
     bpl.skuable_type,
