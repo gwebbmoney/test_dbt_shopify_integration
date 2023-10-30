@@ -2,7 +2,7 @@ WITH raw_order_lines AS(
     SELECT * FROM {{ source('raw_infotrax', 'ORDERLINES') }}
 ),
 raw_infotrax_orders AS(
-    SELECT * FROM {{ ref("stg_infotrax__orders")}}
+    SELECT * FROM {{ ref("stg_infotrax__orders") }}
 ),
 product_bundle_base AS(
     SELECT s.name AS sku,

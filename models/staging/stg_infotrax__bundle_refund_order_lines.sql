@@ -1,9 +1,10 @@
 WITH 
 orders AS(SELECT *
         FROM {{ ref("stg_infotrax__orders") }}
-        WHERE order_source <> 904
+        WHERE order_source = 904
 ),
 bundle_product_orders AS(SELECT ol.infotrax_order_number,
+                        o.infotrax_original_order,
                         ol.id,
                         ol.product_name,
                         ol.infotrax_sku,
@@ -24,6 +25,7 @@ bundle_product_orders AS(SELECT ol.infotrax_order_number,
                     AND o.bonus_period >= '2020-01-01'
                 UNION 
                     SELECT ol.infotrax_order_number,
+                        o.infotrax_original_order,
                         ol.id,
                         ol.product_name,
                         ol.infotrax_sku,
@@ -55,6 +57,7 @@ bundle_suggested_price AS(SELECT b.id,
                     WHERE sk.skuable_type = 'Bundle'
 ),
 bundle_product_lines AS(SELECT bpo.infotrax_order_number,
+    bpo.infotrax_original_order,
     bpo.id,
     bpo.component_status,
     bpo.infotrax_sku as sku,
@@ -72,8 +75,8 @@ bundle_product_lines AS(SELECT bpo.infotrax_order_number,
         WHEN bpo.skuable_type = 'Bundle' THEN bsg.price
     END) AS emma_price_dollars,
     (CASE
-        WHEN kit_line > 0 THEN emma_price_dollars * bpo.quantity_ordered
-        WHEN kit_line = 0 THEN retail_amount_cents/100 * bpo.quantity_ordered
+        WHEN kit_line > 0 THEN emma_price_dollars * bpo.quantity_returned
+        WHEN kit_line = 0 THEN retail_amount_cents/100 * bpo.quantity_returned
     END) AS suggested_price_dollars,
     bpo.kit_line,
     bpo.order_line,
@@ -122,7 +125,7 @@ sum_allocation AS(SELECT (CASE
 ),
 price_allocation AS(SELECT bpl.infotrax_order_number,
     bpl.order_line,
-    bpl.quantity_ordered,
+    bpl.quantity_returned,
     sa.product_line_sum_dollars,
     COALESCE((nullif(suggested_price_dollars,0) / nullif((product_line_sum_dollars),0)),0) AS product_price_allocation_percent
 FROM bundle_product_lines bpl JOIN sum_allocation sa ON bpl.infotrax_order_number = sa.infotrax_order_number
@@ -182,6 +185,7 @@ bundle_order_lines AS(SELECT bpl.infotrax_order_number,
     END) AS retail_amount_cents,
     (bpl.emma_price_dollars * 100) AS emma_price_cents,
     bpl.quantity_ordered,
+    bpl.quantity_returned,
     (CASE
         WHEN product_name LIKE '%Perk Pack%' THEN 0
         ELSE round(bpl.suggested_price_dollars * 100, 0)
@@ -212,6 +216,7 @@ FROM bundle_product_lines bpl JOIN product_pricing_percentages ppp ON bpl.infotr
 )
 SELECT order_line_id,
     infotrax_order_number,
+    infotrax_original_order,
     line_item_sku,
     bundle_product_number,
     skuable_type,
@@ -224,6 +229,7 @@ SELECT order_line_id,
     retail_amount_cents,
     emma_price_cents,
     quantity_ordered,
+    quantity_returned,
     line_item_price_cents,
     order_line_sum_cents,
     price_allocation_percentage,
