@@ -35,3 +35,5 @@ SELECT dc.id AS discount_code_id,
     pr.value_type,
     pr.value*100 AS value_cents
 FROM price_rule pr JOIN discount_code dc ON pr.id = dc.price_rule_id
+
+
