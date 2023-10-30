@@ -26,6 +26,7 @@ bundle_lines AS(SELECT infotrax_order_number,
         WHERE kit_line = 0
 ),
 product_bundle_array AS(SELECT DISTINCT(bol.order_line_id),
+                            bol.infotrax_order_number,
                             bol.infotrax_original_order,
                             bol.order_line AS product_order_line,
                             bl.order_line AS bundle_order_line,
@@ -35,7 +36,7 @@ product_bundle_array AS(SELECT DISTINCT(bol.order_line_id),
                                             'quantity', bl.quantity_returned, 
                                             'total_amount', bl.line_item_price_cents, 
                                             'order_line_id', bl.order_line_id,
-                                            'infotrax_order_number', bl.infotrax_order_number)) AS properties
+                                            'infotrax_order_number', bl.infotrax_original_order)) AS properties
         FROM bundle_lines bl JOIN bundle_order_lines bol ON bl.infotrax_order_number = bol.infotrax_order_number
             AND bl.bundle_product_number = bol.bundle_product_number AND bl.promo_id = bol.promo_id
             AND ABS(bol.order_line - bl.order_line) = bol.kit_line
