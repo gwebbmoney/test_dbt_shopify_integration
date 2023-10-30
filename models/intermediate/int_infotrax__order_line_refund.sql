@@ -4,7 +4,8 @@ WITH order_lines AS(SELECT ol.*,
                 WHERE INFOTRAX_SKU <> 'Discount'
                     AND INFOTRAX_SKU <> 'HOSTCREDIT'
 ),
-order_lines_cond AS(SELECT ol.*
+order_lines_cond AS(SELECT ol.*,
+                    o.infotrax_original_order
                 FROM order_lines ol JOIN {{ ref("stg_infotrax__orders") }} o ON ol.infotrax_order_number = o.infotrax_order_number
                 WHERE o.order_source = 904
 ),
