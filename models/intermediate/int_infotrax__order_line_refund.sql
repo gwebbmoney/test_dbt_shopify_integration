@@ -9,7 +9,7 @@ order_lines_cond AS(SELECT ol.*
                 WHERE o.order_source = 904
 ),
 bundle_order_lines AS(SELECT *
-                FROM {{ ref("stg_infotrax__bundle_refund_order_lines" }}
+                FROM {{ ref("stg_infotrax__bundle_refund_order_lines") }}
 ),
 bundle_lines AS(SELECT infotrax_order_number,
             infotrax_original_order,
