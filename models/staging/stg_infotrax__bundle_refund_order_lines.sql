@@ -75,8 +75,8 @@ bundle_product_lines AS(SELECT bpo.infotrax_order_number,
         WHEN bpo.skuable_type = 'Bundle' THEN bsg.price
     END) AS emma_price_dollars,
     (CASE
-        WHEN kit_line > 0 THEN emma_price_dollars * bpo.quantity_returned
-        WHEN kit_line = 0 THEN retail_amount_cents/100 * bpo.quantity_returned
+        WHEN kit_line > 0 THEN emma_price_dollars * bpo.quantity_ordered
+        WHEN kit_line = 0 THEN retail_amount_cents/100 * bpo.quantity_ordered
     END) AS suggested_price_dollars,
     bpo.kit_line,
     bpo.order_line,
@@ -125,7 +125,7 @@ sum_allocation AS(SELECT (CASE
 ),
 price_allocation AS(SELECT bpl.infotrax_order_number,
     bpl.order_line,
-    bpl.quantity_returned,
+    bpl.quantity_ordered,
     sa.product_line_sum_dollars,
     COALESCE((nullif(suggested_price_dollars,0) / nullif((product_line_sum_dollars),0)),0) AS product_price_allocation_percent
 FROM bundle_product_lines bpl JOIN sum_allocation sa ON bpl.infotrax_order_number = sa.infotrax_order_number

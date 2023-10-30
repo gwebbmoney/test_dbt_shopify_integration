@@ -19,6 +19,7 @@ bundle_lines AS(SELECT infotrax_order_number,
             product_name,
             retail_amount_cents,
             quantity_returned,
+            quantity_ordered,
             line_item_price_cents,
             order_line,
             promo_id,
@@ -68,7 +69,8 @@ SELECT id AS order_line_id,
         WHEN properties is not null AND kit_line > 0 THEN emma_price_cents
         ELSE retail_amount_cents
     END) AS refund_price_cents,
-    quantity_returned AS refund_quantity,
+    quantity_ordered AS refund_quantity,
+    quantity_returned AS quantity_returned,
     (refund_price_cents * refund_quantity) AS line_item_price_cents,
     (CASE
         WHEN kit_line > 0 THEN bundle_product_allocation_revenue_cents
