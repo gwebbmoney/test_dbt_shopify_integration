@@ -89,7 +89,7 @@ tax_lines_cond AS(SELECT DISTINCT(o.id),
 order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         (CASE
                             WHEN SUM(amount) IS NULL THEN 0
-                            WHEN kind = 'shipping_refund' THEN SUM(amount)
+                            WHEN kind = 'shipping_refund' THEN (SUM(amount)*-1)
                         END) AS shipping_refund,
                         (CASE
                             WHEN SUM(tax_amount) IS NULL THEN 0
