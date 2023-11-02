@@ -26,4 +26,5 @@ SELECT t.order_id,
     r.note,
     r.restock
 FROM transactions t LEFT JOIN refunds r ON t.order_id = r.order_id
+    AND t.refund_id = r.id
 
