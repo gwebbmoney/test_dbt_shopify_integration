@@ -4,10 +4,5 @@
 
 ### Tables that are within this project include:
 
-#
-
-#### 1. ORDERS and PROCESSED_ORDERS
-
-#### 2. 
 
 
