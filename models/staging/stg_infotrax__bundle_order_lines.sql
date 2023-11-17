@@ -63,7 +63,7 @@ bundle_product_lines AS(SELECT bpo.infotrax_order_number,
     bpo.quantity_returned,
     bpo.retail_amount_cents,
     (CASE 
-        WHEN bpo.promo_id IS NULL THEN '0' 
+        WHEN bpo.promo_id IS NULL THEN '0'
         ELSE bpo.promo_id END) AS promo_id,
     (CASE
         WHEN bpo.skuable_type = 'Bundle' AND bsg.price IS NULL THEN 0
@@ -150,7 +150,7 @@ bundle_order_price_comp AS(SELECT DISTINCT(bc.id),
     (CASE
         WHEN bc.kit_line > 0 THEN ABS(bc.order_line - bol.order_line)
         WHEN bc.kit_line = 0 THEN 0
-    END) as absolute_value
+    END) AS absolute_value
 FROM bundle_order_line bol RIGHT JOIN bundle_components bc ON bol.infotrax_order_number = bc.infotrax_order_number
     AND bol.bundle_product_number = bc.bundle_product_number AND bol.promo_id = bc.promo_id
 WHERE absolute_value = bc.kit_line
