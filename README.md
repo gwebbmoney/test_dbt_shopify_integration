@@ -1,8 +1,8 @@
-## First dbt project
+# Shopify dbt Transformations
 
-### Goal: Transform and ingest Shopify API data into Snowflake
+## Welcome to the Shopify dbt Transformations Repository
 
-### Tables that are within this project include:
+### [Red Aspen Snowflake Documentation] (https://dbdocs.io/gwebb/Shopify-Database-Documentation)
 
 
 
