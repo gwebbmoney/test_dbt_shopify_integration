@@ -23,6 +23,7 @@ bundle_lines AS(SELECT infotrax_order_number,
             component_status
         FROM bundle_order_lines
         WHERE kit_line = 0
+            AND component_status IN ('M', 'P')
 ),
 product_bundle_array AS(SELECT DISTINCT(bol.order_line_id),
                             bol.infotrax_order_number,
@@ -71,6 +72,7 @@ SELECT id AS order_line_id,
         WHEN kit_line > 0 THEN bundle_product_allocation_revenue_cents
         ELSE line_item_price_cents
     END) AS pre_tax_price_cents,
-    (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents
+    (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents,
+    skuable_type
 FROM product_order_line
 ORDER BY infotrax_order_number, order_line

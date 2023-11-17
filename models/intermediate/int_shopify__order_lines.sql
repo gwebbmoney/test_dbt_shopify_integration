@@ -17,4 +17,4 @@ SELECT id AS order_line_id,
     total_discount*100 AS total_discount_cents,
     pre_tax_price*100 AS pre_tax_price_cents,
     gift_card
-FROM order_lines
+FROM order_lines -- ol LEFT JOIN {{ source('shopify_raw', 'PRODUCT_TAG') }} pt ON ol.product_id = pt.product_id
