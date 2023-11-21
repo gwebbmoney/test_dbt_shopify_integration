@@ -7,7 +7,7 @@ SELECT id AS order_line_id,
     variant_id, 
     title AS product_name,
     variant_title AS product_variant_name,
-    sku,
+    ol.sku,
     properties,
     index AS order_line,
     (CASE
