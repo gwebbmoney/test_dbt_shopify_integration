@@ -19,11 +19,6 @@ bundles AS(
 SELECT *
 FROM bundles
 WHERE product_tag_value = 'Bundle' AND skuable_type = 'Product'
-    OR skuable_type = 'Bundle';
-
-
-
-
-
+    OR skuable_type = 'Bundle'
 
 
