@@ -12,7 +12,7 @@ WITH products AS(
         ip.category_id,
         ip.sku,
         ip.skuable_type
-    FROM {{ ref("int_shopify__products") }} p RIGHT JOIN {{ ref("int_infotrax_products") }} ip ON p.emma_product_id = ip.product_id
+    FROM {{ ref("int_shopify__products") }} p RIGHT JOIN {{ ref("int_infotrax__products") }} ip ON p.emma_product_id = ip.product_id
 )
 SELECT pv.*
 FROM product p LEFT JOIN {{ ref("redaspen_bundles") }} b ON p.product_id = b.bundle_id
