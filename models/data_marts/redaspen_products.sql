@@ -15,6 +15,6 @@ WITH products AS(
     FROM {{ ref("int_shopify__products") }} p RIGHT JOIN {{ ref("int_infotrax_products") }} ip ON p.emma_product_id = ip.product_id
 )
 SELECT pv.*
-FROM product_variants pv LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON pv.product_id = bv.bundle_id
-WHERE bv.bundle_id IS NULL
-    AND ip.skuable_type = 'Product'
+FROM product p LEFT JOIN {{ ref("redaspen_bundles") }} b ON p.product_id = b.bundle_id
+WHERE b.bundle_id IS NULL
+    AND p.skuable_type = 'Product'
