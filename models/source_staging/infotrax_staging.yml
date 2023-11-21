@@ -16,3 +16,5 @@ sources:
       - name: SKUS
       - name: PRODUCTS
       - name: BUNDLES
+      - name: CATEGORIES
+      - name: SUB_CATEGORIES

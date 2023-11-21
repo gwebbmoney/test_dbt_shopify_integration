@@ -15,7 +15,7 @@ product_metafield AS(
         value
     FROM {{ source('shopify_raw', 'METAFIELD') }}
     WHERE owner_resource IN ('product', 'PRODUCT')
-        AND key = 'go_live_date'
+        AND key = 'emma_id'
 )
 SELECT product_id,
     product_title,
@@ -24,5 +24,16 @@ SELECT product_id,
     created_at,
     updated_at,
     published_at,
-    (CASE WHEN pm.key = 'go_live_date' THEN pm.value END) AS product_go_live
+    (CASE WHEN pm.key = 'emma_id' THEN pm.value END) AS emma_product_id
 FROM products p LEFT JOIN product_metafield pm ON p.product_id = pm.owner_id
+
+
+
+
+
+
+
+
+
+
+
