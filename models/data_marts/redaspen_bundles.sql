@@ -1,13 +1,7 @@
 WITH bundle_tag AS(
     SELECT *
     FROM {{ source('shopify_raw', 'PRODUCT_TAG') }}
-),
-bundle_type_tag AS(
-SELECT product_id,
-    value
-FROM bundle_tag
-WHERE value = 'Bundle_Fixed'
-    OR value = 'Bundle_Custom'
+    WHERE value = 'Bundle'
 ),
 bundles AS(
     SELECT p.product_id AS shopify_bundle_id,
@@ -17,11 +11,19 @@ bundles AS(
             ELSE p.product_title
         END) AS bundle_title,
         ip.sku,
-        ip.skuable_type
+        ip.skuable_type,
+        bt.value AS product_tag_value
     FROM {{ ref("int_shopify__products") }} p JOIN bundle_tag bt ON p.product_id = bt.product_id
-        RIGHT JOIN {{ ref("int_infotrax__products") }} ip ON p.emma_product_id = ip.product_id
-    WHERE bt.value = 'Bundle'
-        AND ip.skuable_type = 'Bundle'
+       RIGHT JOIN {{ ref("int_infotrax__products") }} ip ON p.emma_product_id = ip.product_id
 )
 SELECT *
 FROM bundles
+WHERE product_tag_value = 'Bundle' AND skuable_type = 'Product'
+    OR skuable_type = 'Bundle';
+
+
+
+
+
+
+
