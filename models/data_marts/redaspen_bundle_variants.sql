@@ -34,6 +34,7 @@ bundle_variants AS(
 SELECT bv.id AS bundle_variant_id,
     bv.title AS bundle_variant_title,
     b.product_id AS bundle_id,
+    b.emma_product_id AS emma_bundle_id,
     b.product_title AS bundle_title,
     btt.value AS bundle_type,
     bv.price,
