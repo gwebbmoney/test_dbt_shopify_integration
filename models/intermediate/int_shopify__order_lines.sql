@@ -3,7 +3,11 @@ WITH order_lines AS(
 )
 SELECT id AS order_line_id,
     order_id,
-    product_id,
+    product_id AS shopify_product_id,
+    (CASE
+        WHEN p.shopify_product_id = ol.product_id THEN p.emma_product_id
+        WHEN b.shopify_bundle_id = ol.product_id THEN b.emma_bundle_id
+    END) AS emma_product_id,
     variant_id, 
     title AS product_name,
     variant_title AS product_variant_name,
