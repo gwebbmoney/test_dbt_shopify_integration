@@ -74,7 +74,7 @@ SELECT pol.id AS order_line_id,
     (price_cents * quantity_ordered) AS line_item_price_cents,
     (CASE
         WHEN pol.kit_line > 0 THEN pol.bundle_product_allocation_revenue_cents
-        ELSE pol.line_item_price_cents
+        ELSE line_item_price_cents
     END) AS pre_tax_price_cents,
     (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents,
     pol.skuable_type
