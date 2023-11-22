@@ -55,29 +55,29 @@ FROM order_lines_cond olc LEFT JOIN bundle_properties bp ON olc.id = bp.order_li
     AND olc.infotrax_order_number = bp.infotrax_order_number
 WHERE olc.component_status NOT IN ('M', 'P')
 )
-SELECT id AS order_line_id,
-    infotrax_order_number AS order_id,
-    product_id AS emma_product_id,
+SELECT pol.id AS order_line_id,
+    pol.infotrax_order_number AS order_id,
+    pol.product_id AS emma_product_id,
     (CASE
-        WHEN p.emma_product_id = pol.product_id AND skuable_type = 'Product' THEN p.shopify_product_id
-        WHEN b.emma_bundle_id = pol.product_id AND skuable_type = 'Bundle' THEN b.shopify_bundle_id
+        WHEN p.emma_product_id = pol.product_id AND pol.skuable_type = 'Product' THEN p.shopify_product_id
+        WHEN b.emma_bundle_id = pol.product_id AND pol.skuable_type = 'Bundle' THEN b.shopify_bundle_id
     END) AS shopify_product_id,
-    product_name,
-    infotrax_sku AS sku,
-    order_line,
-    properties,
+    pol.product_name,
+    pol.infotrax_sku AS sku,
+    pol.order_line,
+    pol.properties,
     (CASE
-        WHEN properties is not null AND kit_line > 0 THEN emma_price_cents
-        ELSE retail_amount_cents
+        WHEN pol.properties is not null AND pol.kit_line > 0 THEN emma_price_cents
+        ELSE pol.retail_amount_cents
     END) AS price_cents,
-    quantity_ordered,
+    pol.quantity_ordered,
     (price_cents * quantity_ordered) AS line_item_price_cents,
     (CASE
-        WHEN kit_line > 0 THEN bundle_product_allocation_revenue_cents
-        ELSE line_item_price_cents
+        WHEN pol.kit_line > 0 THEN pol.bundle_product_allocation_revenue_cents
+        ELSE pol.line_item_price_cents
     END) AS pre_tax_price_cents,
     (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents,
-    skuable_type
+    pol.skuable_type
 FROM product_order_line pol LEFT JOIN {{ ref("redaspen_products") }} p ON pol.sku = p.sku
     LEFT JOIN {{ ref("redaspen_bundles") }} b ON pol.sku = b.sku
-ORDER BY infotrax_order_number, order_line
+ORDER BY pol.infotrax_order_number, pol.order_line
