@@ -106,7 +106,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     GROUP BY o.id, oa.kind
 ),
-order_type_tag AS(
+order_tag_cond AS(
     SELECT DISTINCT(order_id) AS order_id,
     (CASE
         WHEN value = 'Subscription First Order' THEN 'Subscription_First_Order'
