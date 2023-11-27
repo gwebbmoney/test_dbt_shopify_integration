@@ -24,3 +24,6 @@ GIFT_CARD,
     ELSE 'Shopify'
 END) AS SOURCE
 FROM data_union
+
+
+
