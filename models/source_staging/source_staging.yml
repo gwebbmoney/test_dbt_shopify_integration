@@ -25,4 +25,5 @@ sources:
       - name: CUSTOMER_TAG
       - name: CUSTOMER_ADDRESS
       - name: PRODUCT_TAG
+      - name: ORDER_TAG
 

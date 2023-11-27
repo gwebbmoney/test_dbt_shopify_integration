@@ -105,6 +105,16 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         END) AS order_adjustment_tax_amount
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     GROUP BY o.id, oa.kind
+),
+order_type_tag AS(
+    SELECT DISTINCT(order_id) AS order_id,
+    (CASE
+        WHEN value = 'Subscription First Order' THEN 'Subscription_First_Order'
+        WHEN value = 'Subscription Recurring Order' THEN 'Subscription_Recurring_Order'
+        WHEN value = 'Enrollment Order' THEN 'Enrollment_Order'
+    END) AS order_tag_type
+FROM {{ source("shopify_raw", 'ORDER_TAG') }}
+WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -157,6 +167,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.referring_site,
     o.app_id,
     o.buyer_accepts_marketing,
+    otc.order_tag_type,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"BrandAmbassadorID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS brandambassadorid,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"PartyID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS partyid,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"HostID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS hostid,
@@ -174,6 +185,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN shipping_amount sa ON oi.id = sa.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
+    LEFT JOIN order_tag_cond otc ON oi.id = otc.order_id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
 WHERE o._fivetran_deleted = FALSE
 --AND o.test = FALSE
