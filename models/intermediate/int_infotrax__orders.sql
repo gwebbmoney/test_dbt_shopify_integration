@@ -76,6 +76,10 @@ SELECT oi.infotrax_order_number AS order_id,
         WHEN oi.order_status = 9 THEN 'cancelled'
         ELSE 'fulfilled'
      END) AS fulfillment_status,
+    (CASE
+        WHEN order_source = 903 THEN 'Subscription_Order'
+        WHEN order_source = 905 THEN 'Enrollment_Order'
+    END) AS order_tag_type,
     refund_subtotal_amount AS subtotal_refund_cents,
     refund_discount_amount AS discount_refund_cents,
     refund_sales_tax_amount AS sales_tax_refund_cents,
