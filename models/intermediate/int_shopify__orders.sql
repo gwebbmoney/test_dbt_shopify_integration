@@ -115,6 +115,16 @@ order_tag_cond AS(
     END) AS order_tag_type
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
 WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
+),
+distributor_status_metafield AS(
+    SELECT DISTINCT(owner_id) AS order_id,
+    (CASE
+        WHEN value = 'Consumer Order' THEN 'C'
+        WHEN value = 'Affiliate Order' THEN 'A'
+        WHEN value = 'Distributor Order' THEN 'D'
+    END) AS distributor_status
+FROM {{ source('shopify_raw', 'METAFIELD') }}
+WHERE value IN ('Consumer Order', 'Distributor Order', 'Affiliate Order')
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -163,6 +173,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.customer_id,
     o.user_id,
     o.checkout_id,
+    dsm.distributor_status,
     o.checkout_token,
     o.referring_site,
     o.app_id,
@@ -186,6 +197,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
     LEFT JOIN order_tag_cond otc ON oi.id = otc.order_id
+    LEFT JOIN distributor_status_metafield dsm ON oi.id = dsm.order_id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
 WHERE o._fivetran_deleted = FALSE
 --AND o.test = FALSE
