@@ -25,7 +25,7 @@ bundle_variants AS(
     FROM {{ source('shopify_raw', 'PRODUCT_VARIANT') }} bv JOIN bundles b ON bv.product_id = b.product_id
         LEFT JOIN bundle_type_tag btt ON b.product_id = btt.product_id
 )
-SELECT COALESCE(b.product_id, bv.emma_bundle_id)::number AS emma_bundle_id,
+SELECT CAST(COALESCE(b.product_id, bv.emma_bundle_id) AS number) AS emma_bundle_id,
     bv.bundle_id AS shopify_bundle_id,
     COALESCE(b.product_title, bv.bundle_title) AS bundle_title,
     bv.bundle_variant_id AS shopify_bundle_variant_id,
