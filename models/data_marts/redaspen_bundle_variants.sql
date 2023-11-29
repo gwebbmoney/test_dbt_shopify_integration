@@ -15,38 +15,23 @@ bundles AS(
     WHERE bt.value = 'Bundle'
 ),
 bundle_variants AS(
-    SELECT id,
-        product_id,
-        inventory_item_id,
-        title,
-        price,
-        sku,
-        position,
-        created_at,
-        updated_at,
-        grams,
-        weight,
-        option_1,
-        option_2,
-        option_3
-    FROM {{ source('shopify_raw', 'PRODUCT_VARIANT') }}
-)
-SELECT bv.id AS bundle_variant_id,
+    SELECT bv.id AS bundle_variant_id,
     bv.title AS bundle_variant_title,
     b.product_id AS bundle_id,
     b.emma_product_id AS emma_bundle_id,
     b.product_title AS bundle_title,
     btt.value AS bundle_type,
-    bv.price,
-    bv.sku,
-    bv.position,
-    bv.created_at,
-    bv.updated_at,
-    bv.grams,
-    bv.weight,
-    bv.inventory_item_id,
-    bv.option_1,
-    bv.option_2,
-    bv.option_3
-FROM bundles b LEFT JOIN bundle_type_tag btt ON b.product_id = btt.product_id
-    JOIN bundle_variants bv ON b.product_id = bv.product_id
+    bv.sku
+    FROM {{ source('shopify_raw', 'PRODUCT_VARIANT') }} bv JOIN bundles b ON bv.product_id = b.product_id
+        LEFT JOIN bundle_type_tag btt ON b.product_id = btt.product_id
+)
+SELECT COALESCE(b.product_id, bv.emma_bundle_id)::number AS emma_bundle_id,
+    bv.bundle_id AS shopify_bundle_id,
+    COALESCE(b.product_title, bv.bundle_title) AS bundle_title,
+    bv.bundle_variant_id AS shopify_bundle_variant_id,
+    bv.bundle_variant_title AS shopify_bundle_variant_title,
+    COALESCE(b.sku, bv.sku) AS sku,
+    COALESCE(bundle_type, skuable_type) AS bundle_type
+FROM bundle_variants bv FULL OUTER JOIN {{ ref('int_infotrax__products') }} b ON bv.sku = b.sku
+WHERE bundle_type IN ('Bundle_Custom', 'Bundle_Fixed')
+    OR skuable_type = 'Bundle'
