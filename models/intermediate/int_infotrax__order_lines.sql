@@ -39,7 +39,8 @@ product_bundle_array AS(SELECT DISTINCT(bol.order_line_id),
                                             'product_order_line_id', bol.order_line_id)) AS properties
         FROM bundle_lines bl JOIN bundle_order_lines bol ON bl.infotrax_order_number = bol.infotrax_order_number
             AND bl.bundle_product_number = bol.bundle_product_number AND bl.promo_id = bol.promo_id
-            AND ABS(bol.order_line - bl.order_line) = bol.kit_line
+        WHERE ABS(bol.order_line - bl.order_line) = bol.kit_line
+            AND bol.order_line_id > bl.order_line_id
             AND bol.component_status NOT IN ('M', 'P')
         ORDER BY bol.order_line_id
 ),
