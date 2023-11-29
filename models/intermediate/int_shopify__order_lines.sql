@@ -15,8 +15,8 @@ SELECT id AS order_line_id,
     properties,
     index AS order_line,
     (CASE
-        WHEN p.shopify_product_id = ol.product_id THEN p.skuable_type
-        WHEN b.shopify_bundle_id = ol.product_id THEN b.skuable_type
+        WHEN p.shopify_product_id = ol.product_id THEN 'Product'
+        WHEN b.shopify_bundle_id = ol.product_id THEN b.bundle_type
     END) AS skuable_type,
     price*100 AS price_cents,
     quantity AS quantity_ordered,
