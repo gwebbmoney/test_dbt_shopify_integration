@@ -59,10 +59,6 @@ WHERE olc.component_status NOT IN ('M', 'P')
 SELECT pol.id AS order_line_id,
     pol.infotrax_order_number AS order_id,
     pol.product_id AS emma_product_id,
-    (CASE
-        WHEN p.emma_product_id = pol.product_id AND pol.skuable_type = 'Product' THEN p.shopify_product_id
-        WHEN b.emma_bundle_id = pol.product_id AND pol.skuable_type = 'Bundle' THEN b.shopify_bundle_id
-    END) AS shopify_product_id,
     pol.product_name,
     pol.infotrax_sku AS sku,
     pol.order_line,
@@ -79,6 +75,5 @@ SELECT pol.id AS order_line_id,
     END) AS pre_tax_price_cents,
     (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents,
     pol.skuable_type
-FROM product_order_line pol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON pol.infotrax_sku = p.sku
-    LEFT JOIN {{ ref("redaspen_bundle_variants") }} b ON pol.infotrax_sku = b.sku
+FROM product_order_line pol
 ORDER BY pol.infotrax_order_number, pol.order_line
