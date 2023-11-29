@@ -65,7 +65,7 @@ SELECT pol.id AS order_line_id,
     pol.order_line,
     pol.properties AS bundle_properties,
     (CASE
-        WHEN pol.properties is not null AND pol.kit_line > 0 THEN emma_price_cents
+        WHEN bundle_properties is not null AND pol.kit_line > 0 THEN emma_price_cents
         ELSE pol.retail_amount_cents
     END) AS price_cents,
     pol.quantity_ordered,
