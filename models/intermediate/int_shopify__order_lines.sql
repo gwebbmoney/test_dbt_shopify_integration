@@ -25,5 +25,5 @@ SELECT id AS order_line_id,
     total_discount*100 AS total_discount_cents,
     pre_tax_price*100 AS pre_tax_price_cents,
     gift_card
-FROM order_lines ol LEFT JOIN {{ ref("redaspen_products") }} p ON ol.sku = p.sku
-    LEFT JOIN {{ ref("redaspen_bundles") }} b ON ol.sku = b.sku
+FROM order_lines ol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON ol.sku = p.sku
+    LEFT JOIN {{ ref("redaspen_bundle_variants") }} b ON ol.sku = b.sku
