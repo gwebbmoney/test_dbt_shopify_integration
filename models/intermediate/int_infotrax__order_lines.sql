@@ -79,6 +79,6 @@ SELECT pol.id AS order_line_id,
     END) AS pre_tax_price_cents,
     (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents,
     pol.skuable_type
-FROM product_order_line pol LEFT JOIN {{ ref("redaspen_products") }} p ON pol.infotrax_sku = p.sku
-    LEFT JOIN {{ ref("redaspen_bundles") }} b ON pol.infotrax_sku = b.sku
+FROM product_order_line pol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON pol.infotrax_sku = p.sku
+    LEFT JOIN {{ ref("redaspen_bundle_variants") }} b ON pol.infotrax_sku = b.sku
 ORDER BY pol.infotrax_order_number, pol.order_line
