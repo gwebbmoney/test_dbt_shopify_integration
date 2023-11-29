@@ -63,7 +63,7 @@ SELECT pol.id AS order_line_id,
     pol.product_name,
     pol.infotrax_sku AS sku,
     pol.order_line,
-    pol.properties,
+    pol.properties AS bundle_properties,
     (CASE
         WHEN pol.properties is not null AND pol.kit_line > 0 THEN emma_price_cents
         ELSE pol.retail_amount_cents
