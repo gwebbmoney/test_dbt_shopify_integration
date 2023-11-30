@@ -28,7 +28,7 @@ SELECT NULL AS order_line_id,
     quantity_ordered,
     NULL AS sku,
     bundle_name,
-    price_cents,
+    (price_cents * quantity_ordered) AS pre_tax_price_cents,
     source
 FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
             ol.order_id,
