@@ -28,6 +28,7 @@ bundle_variants AS(
 SELECT CAST(COALESCE(b.product_id, bv.emma_bundle_id) AS number) AS emma_bundle_id,
     bv.bundle_id AS shopify_bundle_id,
     COALESCE(b.product_title, bv.bundle_title) AS bundle_title,
+    bv.bundle_title AS shopify_bundle_title,
     bv.bundle_variant_id AS shopify_bundle_variant_id,
     bv.bundle_variant_title AS shopify_bundle_variant_title,
     COALESCE(b.sku, bv.sku) AS sku,
