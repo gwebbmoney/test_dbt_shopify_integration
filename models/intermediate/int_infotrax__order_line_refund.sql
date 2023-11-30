@@ -57,7 +57,7 @@ with
                     'infotrax_order_number',
                     bl.infotrax_original_order
                 )
-            ) as properties
+            ) as bundle_properties
         from bundle_lines bl
         join
             bundle_order_lines bol
@@ -69,7 +69,7 @@ with
         order by bol.order_line_id
     ),
     bundle_properties as (
-        select bol.*, pba.properties
+        select bol.*, pba.bundle_properties
         from product_bundle_array pba
         join
             bundle_order_lines bol
@@ -82,7 +82,7 @@ with
             olc.*,
             bp.emma_price_cents,
             bp.bundle_product_allocation_revenue_cents,
-            bp.properties
+            bp.bundle_properties
         from order_lines_cond olc
         left join
             bundle_properties bp
@@ -97,10 +97,10 @@ select
     product_name,
     infotrax_sku as sku,
     order_line as refund_order_line,
-    properties,
+    bundle_properties,
     (
         case
-            when properties is not null and kit_line > 0
+            when bundle_properties is not null and kit_line > 0
             then emma_price_cents
             else retail_amount_cents
         end
