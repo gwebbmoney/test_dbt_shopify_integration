@@ -23,7 +23,7 @@ UNION
         order_id,
         price_cents,
         quantity_ordered,
-        bundle_sku,
+        sku AS bundle_sku,
         product_name AS bundle_name,
         pre_tax_price_cents,
         NULL AS product_sku_array,
