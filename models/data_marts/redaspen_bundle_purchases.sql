@@ -7,7 +7,7 @@ WHERE bundle_properties IS NOT NULL
 GROUP BY bundle_order_line_id, ol.order_id
 ),
 bundle_union AS(
-    SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS order_line_id,
+    SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS bundle_order_line_id,
         ol.bundle_properties[0]['infotrax_order_number'] AS order_id,
         ol.bundle_properties[0]['price'] AS price_cents,
         ol.bundle_properties[0]['quantity'] AS quantity_ordered,
@@ -52,8 +52,10 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
         AND ARRAY_SIZE(ol.bundle_properties) > 0)
 )
 SELECT bu.*,
-    bv.bundle_type
+    bv.bundle_type,
+    o.created_at
 FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
+    LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
     OR bu.bundle_name = bv.shopify_bundle_title 
 
 
