@@ -55,8 +55,8 @@ SELECT bu.*,
     bv.bundle_type,
     o.created_at
 FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
-    LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
     OR bu.bundle_name = bv.shopify_bundle_title 
+LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
 
 
 
