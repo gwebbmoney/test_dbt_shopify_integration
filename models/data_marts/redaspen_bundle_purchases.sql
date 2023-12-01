@@ -23,7 +23,7 @@ UNION
         order_id,
         price_cents,
         quantity_ordered,
-        sku,
+        bundle_sku,
         product_name AS bundle_name,
         pre_tax_price_cents,
         NULL AS product_sku_array,
@@ -35,7 +35,7 @@ SELECT NULL AS order_line_id,
     order_id,
     price_cents,
     quantity_ordered,
-    NULL AS sku,
+    NULL AS bundle_sku,
     bundle_name,
     (price_cents * quantity_ordered) AS pre_tax_price_cents,
     product_sku_array,
@@ -53,7 +53,7 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
 )
 SELECT bu.*,
     bv.bundle_type
-FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.sku = bv.sku
+FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_ßsku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title 
 
 
