@@ -1,25 +1,22 @@
-WITH infotrax_array AS(SELECT ol.bundle_properties[0]['bundle_order_line_id'] AS order_line_id,
+WITH infotrax_array AS(SELECT ol.bundle_properties[0]['bundle_order_line_id'] AS bundle_order_line_id,
     ol.order_id,
     ARRAY_AGG(sku) AS product_sku_array
 FROM {{ ref("redaspen_order_lines") }} ol
 WHERE bundle_properties IS NOT NULL
     AND source = 'Infotrax'
-GROUP BY order_line_id, ol.order_id
-ORDER BY order_line_id
+GROUP BY bundle_order_line_id, ol.order_id
 ),
 bundle_union AS(
-    SELECT DISTINCT(fol.value:bundle_order_line_id::number) AS order_line_id,
-        fol.value:infotrax_order_number::number AS order_id,
-        fol.value:price::number AS price_cents,
-        fol.value:quantity::number AS quantity_ordered,
-        fol.value:set::varchar AS sku,
-        fol.value:set_name::varchar AS bundle_name,
-        fol.value:total_amount::number AS pre_tax_price_cents,
-        ia.product_sku_array,
+    SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS order_line_id,
+        ol.bundle_properties[0]['infotrax_order_number'] AS order_id,
+        ol.bundle_properties[0]['price'] AS price_cents,
+        ol.bundle_properties[0]['quantity'] AS quantity_ordered,
+        ol.bundle_properties[0]['set']::varchar AS bundle_sku,
+        ol.bundle_properties[0]['set_name']::varchar AS bundle_name,
+        ol.bundle_properties[0]['total_amount'] AS pre_tax_price_cents,
+        ia.product_sku_array AS product_sku_array,
         ol.source
-    FROM {{ ref("redaspen_order_lines") }} ol,
-        LATERAL FLATTEN (input => ol.bundle_properties) fol
-    LEFT JOIN infotrax_array ia ON fol.order_line_id = ia.order_line_id
+    FROM {{ ref("redaspen_order_lines") }} ol LEFT JOIN infotrax_array ia ON ol.bundle_properties[0]['bundle_order_line_id'] = ia.bundle_order_line_id
     WHERE source = 'Infotrax'
 UNION
     SELECT order_line_id,
