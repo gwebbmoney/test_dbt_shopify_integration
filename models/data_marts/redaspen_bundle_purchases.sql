@@ -53,7 +53,7 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
 )
 SELECT bu.*,
     bv.bundle_type
-FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_ßsku = bv.sku
+FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title 
 
 
