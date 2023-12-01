@@ -7,7 +7,7 @@ WHERE bundle_properties IS NOT NULL
 GROUP BY bundle_order_line_id, ol.order_id
 ),
 bundle_union AS(
-    SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS order_line_id,
+    SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS bundle_order_line_id,
         ol.bundle_properties[0]['infotrax_order_number'] AS order_id,
         ol.bundle_properties[0]['price'] AS price_cents,
         ol.bundle_properties[0]['quantity'] AS quantity_ordered,
