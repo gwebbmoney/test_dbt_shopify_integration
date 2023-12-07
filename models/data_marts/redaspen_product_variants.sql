@@ -1,6 +1,12 @@
 WITH products AS(
     SELECT * FROM {{ ref("int_shopify__products") }}
 ),
+product_tag AS(
+    SELECT product_id,  
+        value AS product_tag
+    FROM {{ source('shopify_raw', 'PRODUCT_TAG') }}
+    WHERE value = 'bogos-gift' 
+)
 product_variants AS(
     SELECT pv.id AS product_variant_id,
     pv.title AS product_variant_title,
@@ -16,7 +22,10 @@ product_variants AS(
 )
 SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_product_id,
     pv.product_id AS shopify_product_id,
-    COALESCE(p.product_title, pv.product_title) AS product_title,
+    (CASE 
+        WHEN pt.product_tag = 'bogos-gift' THEN pv.product_title
+        ELSE COALESCE(p.product_title, pv.product_title)
+    END) AS product_title,
     pv.product_variant_id AS shopify_product_variant_id,
     pv.product_variant_title AS shopify_product_variant_title,
     COALESCE(p.sku, pv.sku) AS sku,
@@ -25,8 +34,8 @@ SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_produc
     p.sub_category_id,
     p.sub_category_name
 FROM product_variants pv FULL OUTER JOIN {{ ref("int_infotrax__products") }} p ON pv.sku = p.sku
+    LEFT JOIN product_tag pt ON pv.product_id = pt.product_id
 WHERE p.skuable_type = 'Product'
-
 
 
 
