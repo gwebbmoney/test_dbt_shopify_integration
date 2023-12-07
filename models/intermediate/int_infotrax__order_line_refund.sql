@@ -34,10 +34,8 @@ with
         where kit_line = 0
     ),
     product_bundle_array as (
-        select distinct
-            (bol.order_line_id),
+        select distinct(bol.order_line_id),
             bol.infotrax_order_number,
-            bol.infotrax_original_order,
             bol.order_line as product_order_line,
             bl.order_line as bundle_order_line,
             array_construct(
@@ -52,10 +50,11 @@ with
                     bl.quantity_returned,
                     'total_amount',
                     bl.line_item_price_cents,
-                    'order_line_id',
+                    'bundle_order_line_id',
                     bl.order_line_id,
                     'infotrax_order_number',
-                    bl.infotrax_original_order
+                    bl.infotrax_original_order,
+                    'product_order_line_id', bol.order_line_id
                 )
             ) as bundle_properties
         from bundle_lines bl
@@ -64,8 +63,9 @@ with
             on bl.infotrax_order_number = bol.infotrax_order_number
             and bl.bundle_product_number = bol.bundle_product_number
             and bl.promo_id = bol.promo_id
-            and abs(bol.order_line - bl.order_line) = bol.kit_line
+            where abs(bol.order_line - bl.order_line) = bol.kit_line
             and bol.component_status not in ('M', 'P')
+            and bol.order_line_id > bl.order_line_id
         order by bol.order_line_id
     ),
     bundle_properties as (
@@ -107,7 +107,7 @@ select
     ) as refund_price_cents,
     quantity_ordered as refund_quantity,
     quantity_returned as quantity_returned,
-    (refund_price_cents * refund_quantity) as line_item_price_cents,
+    CAST((refund_price_cents * refund_quantity) AS NUMBER) as line_item_price_cents,
     (
         case
             when kit_line > 0
