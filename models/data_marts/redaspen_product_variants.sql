@@ -6,7 +6,7 @@ product_tag AS(
         value AS product_tag
     FROM {{ source('shopify_raw', 'PRODUCT_TAG') }}
     WHERE value = 'bogos-gift' 
-)
+),
 product_variants AS(
     SELECT pv.id AS product_variant_id,
     pv.title AS product_variant_title,
