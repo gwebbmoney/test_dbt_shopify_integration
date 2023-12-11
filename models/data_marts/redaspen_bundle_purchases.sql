@@ -58,7 +58,7 @@ SELECT bu.bundle_order_line_id,
     bu.bundle_sku,
     bu.bundle_name,
     CAST(bu.pre_tax_price_cents AS NUMBER) AS pre_tax_price_cents,
-    bu.product_sku_array,
+    array_sort(bu.product_sku_array) AS product_sku_array,
     bu.source,
     bv.bundle_type,
     o.created_at
