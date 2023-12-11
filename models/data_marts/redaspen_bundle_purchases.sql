@@ -51,7 +51,15 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
     WHERE source = 'Shopify'
         AND ARRAY_SIZE(ol.bundle_properties) > 0)
 )
-SELECT bu.*,
+SELECT bu.order_line_id,
+    bu.order_id,
+    CAST(bu.price_cents AS NUMBER) AS price_cents,
+    bu.quantity_ordered,
+    bu.bundle_sku,
+    bu.bundle_name,
+    CAST(bu.pre_tax_price_cents AS NUMBER) AS pre_tax_price_cents,
+    bu.product_sku_array,
+    bu.source,
     bv.bundle_type,
     o.created_at
 FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
