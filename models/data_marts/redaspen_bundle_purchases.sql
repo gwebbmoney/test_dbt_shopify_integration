@@ -51,7 +51,7 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
     WHERE source = 'Shopify'
         AND ARRAY_SIZE(ol.bundle_properties) > 0)
 )
-SELECT bu.order_line_id,
+SELECT bu.bundle_order_line_id,
     bu.order_id,
     CAST(bu.price_cents AS NUMBER) AS price_cents,
     bu.quantity_ordered,
