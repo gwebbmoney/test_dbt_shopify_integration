@@ -1,6 +1,6 @@
-{{ config(database = 'fivetran_events_raw_data') }}
+{{ config(database = 'redaspen_v2') }}
 
-{{ config(schema = 'practice')}}
+{{ config(schema = 'orders')}}
 
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__orders'), ref('int_infotrax__orders')]
