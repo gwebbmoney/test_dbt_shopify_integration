@@ -1,3 +1,7 @@
+{{ config(database = 'redaspen_v2') }}
+
+{{ config(schema = 'distributors')}}
+
 WITH shopify_customers AS(
     SELECT * FROM {{ ref("int_shopify__customers") }}
 ),

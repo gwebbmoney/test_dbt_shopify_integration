@@ -1,3 +1,7 @@
+{{ config(database = 'redaspen_v2') }}
+
+{{ config(schema = 'bundles')}}
+
 WITH bundle_tag AS(
     SELECT *
     FROM {{ source('shopify_raw', 'PRODUCT_TAG') }}

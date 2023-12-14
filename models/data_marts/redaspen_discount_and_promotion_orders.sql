@@ -1,3 +1,7 @@
+{{ config(database = 'redaspen_v2') }}
+
+{{ config(schema = 'discounts_and_promotions')}}
+
 WITH discount_code AS(SELECT order_id,    
                         index,
                         code AS order_discount_code,
