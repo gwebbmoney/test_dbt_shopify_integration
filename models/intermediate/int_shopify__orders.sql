@@ -187,6 +187,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     --Edit the splits once I find out more information on how notes/comments are inputted
     SPLIT_PART(SPLIT_PART(o.note, '\n', 2), ':', 2) AS sphere_order_number_reference,
     SPLIT_PART(SPLIT_PART(o.note, '\n', 3), ':', 2) AS infotrax_order_number_reference,
+    o.test,
     o._fivetran_deleted,
     o._fivetran_synced
 FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id 
