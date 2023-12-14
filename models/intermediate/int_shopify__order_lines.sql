@@ -12,7 +12,7 @@ SELECT id AS order_line_id,
     title AS product_name,
     variant_title AS product_variant_name,
     ol.sku,
-    nullif(bundle_properties, []) AS bundle_properties,
+    nullif(properties, []) AS bundle_properties,
     index AS order_line,
     (CASE
         WHEN p.shopify_product_id = ol.product_id THEN 'Product'
