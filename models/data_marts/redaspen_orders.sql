@@ -1,6 +1,6 @@
-{{ config(schema = 'practice') }}
+{{ config(schema = 'ORDERS') }}
 
-{{ config(database = 'redaspen_v2')}}
+{{ config(database = 'REDASPEN_V2')}}
 
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__orders'), ref('int_infotrax__orders')]
