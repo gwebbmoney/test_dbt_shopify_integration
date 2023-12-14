@@ -25,7 +25,7 @@ TOTAL_DISCOUNT_CENTS,
 PRE_TAX_PRICE_CENTS,
 GIFT_CARD,
 (CASE 
-    WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.transformed_shopify_api.int_infotrax__order_lines' THEN 'Infotrax'
+    WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.dbt_shopify_transformations.int_infotrax__order_lines' THEN 'Infotrax'
     ELSE 'Shopify'
 END) AS SOURCE
 FROM data_union
