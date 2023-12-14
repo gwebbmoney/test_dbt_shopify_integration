@@ -1,3 +1,7 @@
+{{ config(database = 'redaspen_v2') }}
+
+{{ config(schema = 'discounts_and_promotions')}}
+
 WITH price_rule AS(SELECT id,
                     created_at,
                     starts_at,

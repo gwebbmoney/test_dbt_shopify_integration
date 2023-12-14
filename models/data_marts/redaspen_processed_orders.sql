@@ -1,3 +1,7 @@
+{{ config(database = 'redaspen_v2') }}
+
+{{ config(schema = 'orders')}}
+
 WITH orders AS(
     SELECT * FROM {{ ref("redaspen_orders") }}
 )
