@@ -22,7 +22,7 @@ SELECT ORDER_ID,
     QUANTITY_RETURNED,
     LINE_ITEM_PRICE_CENTS,
     (CASE
-        WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.transformed_shopify_api.int_infotrax__order_line_refund' THEN 'Infotrax'
+        WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.dbt_shopify_transformations.int_infotrax__order_line_refund' THEN 'Infotrax'
         ELSE 'Shopify'
     END) AS source
 FROM data_union 

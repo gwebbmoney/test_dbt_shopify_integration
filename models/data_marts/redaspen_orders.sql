@@ -67,7 +67,7 @@ NOTE_ATTRIBUTES,
 SPHERE_ORDER_NUMBER_REFERENCE,
 INFOTRAX_ORDER_NUMBER_REFERENCE,
 (CASE
-    WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.transformed_shopify_api.int_infotrax__orders' THEN 'Infotrax'
+    WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.dbt_shopify_transformations.int_infotrax__orders' THEN 'Infotrax'
     ELSE 'Shopify'
 END) AS SOURCE,
 _FIVETRAN_DELETED,
