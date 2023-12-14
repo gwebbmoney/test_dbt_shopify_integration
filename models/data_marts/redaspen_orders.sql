@@ -1,5 +1,3 @@
-{{ config(schema = 'ORDERS') }}
-
 {{ config(database = 'RA') }}
 
 WITH data_union AS({{dbt_utils.union_relations(
