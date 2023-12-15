@@ -26,7 +26,7 @@ SELECT id AS order_line_id,
     total_discount*100 AS total_discount_cents,
     pre_tax_price*100 AS pre_tax_price_cents,
     gift_card
-FROM order_lines ol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id
+FROM order_lines ol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id -- Change to just sku join once duplicate products are eliminated
     LEFT JOIN {{ ref("redaspen_bundle_variants") }} b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
 
 
