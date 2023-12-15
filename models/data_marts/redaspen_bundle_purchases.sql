@@ -65,6 +65,7 @@ SELECT bu.bundle_order_line_id,
     array_sort(bu.product_sku_array) AS product_sku_array,
     bu.source,
     bv.bundle_type,
+    o.distributor_status,
     o.created_at
 FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title 
