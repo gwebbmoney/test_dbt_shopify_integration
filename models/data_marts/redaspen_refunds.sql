@@ -1,3 +1,7 @@
+{{ config(database = 'redaspen_v2') }}
+
+{{ config(schema = 'transaction_metrics')}}
+
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('stg_shopify__refunds'), ref('stg_infotrax__refunds')]
 )}}
