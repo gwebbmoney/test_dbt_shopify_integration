@@ -31,6 +31,8 @@ product_variants AS(
     p.volume,
     p.status_id,
     p.status,
+    p.price,
+    p.pv,
     pv.sku
     FROM products p JOIN {{ source('shopify_raw', 'PRODUCT_VARIANT') }} pv ON p.product_id = pv.product_id
         LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON p.product_id = bv.shopify_bundle_id
@@ -63,7 +65,9 @@ SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_produc
     pv.volume_id,
     pv.volume,
     pv.status_id, 
-    pv.status
+    pv.status,
+    pv.price,
+    pv.pv
 FROM product_variants pv FULL OUTER JOIN {{ ref("int_infotrax__products") }} p ON pv.sku = p.sku
     LEFT JOIN product_tag pt ON pv.product_id = pt.product_id
 WHERE p.skuable_type = 'Product'
