@@ -65,7 +65,7 @@ with
             and bl.promo_id = bol.promo_id
             where abs(bol.order_line - bl.order_line) = bol.kit_line
             and bol.component_status not in ('M', 'P')
-            and bol.order_line_id > bl.order_line_id
+            and bol.order_line > bl.order_line
         order by bol.order_line_id
     ),
     bundle_properties as (
