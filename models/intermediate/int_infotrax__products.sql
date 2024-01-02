@@ -19,6 +19,9 @@ SELECT p.id AS product_id,
     p.status_id,
     p.status,
     p.finish,
+    p.price,
+    p.pv,
+    NULL AS value,
     s.skuable_type
 FROM {{ source("redaspen", 'PRODUCTS') }} p LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
     LEFT JOIN {{ source("redaspen", 'CATEGORIES') }} c ON p.category_id = c.id
@@ -43,9 +46,12 @@ SELECT b.id AS bundle_id,
     NULL AS design,
     NULL AS volume_id,
     NULL AS volume,
-    NULL AS status_id,
+    b.status_id AS status_id,
     NULL AS status,
     NULL AS finish,
+    b.price AS price,
+    b.pv AS pv,
+    b.value AS value,
     s.skuable_type
 FROM {{ source("redaspen", 'BUNDLES') }} b LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
 WHERE s.skuable_type = 'Bundle'
