@@ -18,3 +18,10 @@ sources:
       - name: BUNDLES
       - name: CATEGORIES
       - name: SUB_CATEGORIES
+
+  - name: normalized_snowflake
+    database: redaspen
+    schema: products
+    tables:
+      - name: PRODUCTS
+

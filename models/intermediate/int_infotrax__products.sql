@@ -23,7 +23,7 @@ SELECT p.id AS product_id,
     p.pv,
     NULL AS value,
     s.skuable_type
-FROM {{ source("redaspen", 'PRODUCTS') }} p LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
+FROM {{ source("normalized_snowflake", 'PRODUCTS') }} p LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
     LEFT JOIN {{ source("redaspen", 'CATEGORIES') }} c ON p.category_id = c.id
     LEFT JOIN {{ source("redaspen", 'SUB_CATEGORIES') }} sc ON p.sub_category_id = sc.id
 WHERE s.skuable_type = 'Product'
