@@ -21,6 +21,7 @@ SELECT p.id AS product_id,
     p.finish,
     p.price,
     p.pv,
+    p.component,
     NULL AS value,
     s.skuable_type
 FROM {{ source("normalized_snowflake", 'PRODUCTS') }} p LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
@@ -51,6 +52,7 @@ SELECT b.id AS bundle_id,
     NULL AS finish,
     b.price AS price,
     b.pv AS pv,
+    NULL AS b.component,
     b.value AS value,
     s.skuable_type
 FROM {{ source("redaspen", 'BUNDLES') }} b LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
