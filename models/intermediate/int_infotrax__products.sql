@@ -52,7 +52,7 @@ SELECT b.id AS bundle_id,
     NULL AS finish,
     b.price AS price,
     b.pv AS pv,
-    NULL AS b.component,
+    NULL AS component,
     b.value AS value,
     s.skuable_type
 FROM {{ source("redaspen", 'BUNDLES') }} b LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
