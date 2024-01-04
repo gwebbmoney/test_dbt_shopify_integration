@@ -52,7 +52,8 @@ SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_produc
     p.status_id, 
     p.status,
     p.price,
-    p.pv
+    p.pv,
+    p.component
 FROM product_variants pv FULL OUTER JOIN {{ ref("int_infotrax__products") }} p ON pv.sku = p.sku
     LEFT JOIN product_tag pt ON pv.product_id = pt.product_id
 WHERE p.skuable_type = 'Product'
