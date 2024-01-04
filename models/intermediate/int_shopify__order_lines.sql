@@ -19,7 +19,7 @@ SELECT id AS order_line_id,
         WHEN b.shopify_bundle_id = ol.product_id THEN 'Bundle'
     END) AS skuable_type,
     bundle_type,
-    price*100 AS price_cents,
+    ol.price*100 AS price_cents,
     quantity AS quantity_ordered,
     fulfillable_quantity,
     (price_cents * quantity) AS line_item_price_cents,
