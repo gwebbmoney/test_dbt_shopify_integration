@@ -41,16 +41,15 @@ order_line_cond AS(SELECT DISTINCT(o.id),
 ),
 order_line_refund_cond AS(SELECT DISTINCT(o.id),
                         (CASE
-                            WHEN SUM(olr.subtotal) IS NULL THEN 0
-                            ELSE SUM(olr.subtotal)
+                            WHEN SUM(olr.refund_price_cents) IS NULL THEN 0
+                            ELSE SUM(olr.refund_price_cents)
                         END) AS subtotal_refund,
                         (CASE
                             WHEN SUM(olr.total_tax) IS NULL THEN 0
                             ELSE SUM(olr.total_tax)
                         END) AS total_tax_refund
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
-                    LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE_REFUND') }} olr ON ol.id = olr.order_line_id
-                    JOIN {{ source('shopify_raw', 'REFUND') }} r ON olr.refund_id = r.id
+                    LEFT JOIN {{ ref('int_shopify__order_line_refund') }} olr ON ol.id = olr.order_line_id
                     GROUP BY o.id
 ),
 order_discount AS(SELECT DISTINCT(o.id),
@@ -143,7 +142,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.cancel_reason,
     o.financial_status,
     o.fulfillment_status,
-    orf.subtotal_refund*100 AS subtotal_refund_cents,
+    orf.subtotal_refund AS subtotal_refund_cents,
     orf.total_tax_refund*100 AS sales_tax_refund_cents,
     oac.shipping_refund*100 AS shipping_refund_cents,
     oac.shipping_tax_refund*100 AS shipping_tax_refund_cents,
