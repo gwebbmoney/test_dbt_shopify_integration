@@ -50,6 +50,7 @@ order_line_refund_cond AS(SELECT DISTINCT(o.id),
                         END) AS total_tax_refund
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
                     LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE_REFUND') }} olr ON ol.id = olr.order_line_id
+                    JOIN {{ source('shopify_raw', 'REFUND') }} r ON olr.refund_id = r.id
                     GROUP BY o.id
 ),
 order_discount AS(SELECT DISTINCT(o.id),
