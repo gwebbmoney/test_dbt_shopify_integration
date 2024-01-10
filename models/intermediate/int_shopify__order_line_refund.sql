@@ -6,7 +6,7 @@ order_lines AS(
 )
 SELECT ol.order_id,
     olr.order_line_id,
-    olr.refund_id,
+    r.refund_id,
     ol.sku,
     ol.shopify_product_id AS product_id,
     ol.product_name,
@@ -17,3 +17,4 @@ SELECT ol.order_id,
     CAST((refund_price_cents * refund_quantity) AS NUMBER) AS pre_tax_refund_cents,
     ol.bundle_properties
 FROM order_line_refund olr JOIN order_lines ol ON olr.order_line_id = ol.order_line_id
+    JOIN {{ ref("stg_shopify__refunds") }} r ON olr.refund_id = r.refund_id
