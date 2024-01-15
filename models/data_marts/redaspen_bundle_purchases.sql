@@ -34,6 +34,8 @@ UNION
         source
     FROM {{ ref("redaspen_order_lines") }}
     WHERE skuable_type = 'Bundle'
+        AND bundle_properties IS NULL
+        AND ARRAY_SIZE(bundle_properties) = 0)
 UNION
 SELECT NULL AS order_line_id,
     order_id,
