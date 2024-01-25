@@ -1,3 +1,6 @@
+--{{ config(database = 'redaspen') }}
+--Will be used to transfer this table to the REDASPEN Schema
+
 {{ config(database = 'redaspen_v2') }}
 
 {{ config(schema = 'products')}}

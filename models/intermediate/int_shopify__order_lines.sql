@@ -32,5 +32,4 @@ FROM order_lines ol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON ol.sku
 
 
 
-
-
+    

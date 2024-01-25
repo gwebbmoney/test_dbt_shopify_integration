@@ -1,3 +1,6 @@
+--{{ config(database = 'redaspen') }}
+--Will be used to transfer this table to the REDASPEN Schema
+
 {{ config(database = 'redaspen_v2') }}
 
 {{ config(schema = 'bundles')}}
@@ -12,6 +15,7 @@ SELECT product_id,
 FROM bundle_tag
 WHERE value = 'Bundle_Fixed'
     OR value = 'Bundle_Custom'
+    OR value = 'LoyaltyBox'
 ),
 bundles AS(
     SELECT p.*
