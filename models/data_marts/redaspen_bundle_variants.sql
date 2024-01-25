@@ -15,6 +15,7 @@ SELECT product_id,
 FROM bundle_tag
 WHERE value = 'Bundle_Fixed'
     OR value = 'Bundle_Custom'
+    OR value = 'LoyaltyBox'
 ),
 bundles AS(
     SELECT p.*
