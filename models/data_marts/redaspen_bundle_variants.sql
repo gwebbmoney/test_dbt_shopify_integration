@@ -41,5 +41,5 @@ SELECT CAST(COALESCE(b.product_id, bv.emma_bundle_id) AS number) AS emma_bundle_
     COALESCE(b.sku, bv.sku) AS sku,
     COALESCE(bundle_type, skuable_type) AS bundle_type
 FROM bundle_variants bv FULL OUTER JOIN {{ ref('int_infotrax__products') }} b ON bv.sku = b.sku
-WHERE bundle_type IN ('Bundle_Custom', 'Bundle_Fixed')
+WHERE bundle_type IN ('Bundle_Custom', 'Bundle_Fixed', 'LoyaltyBox')
     OR skuable_type = 'Bundle'
