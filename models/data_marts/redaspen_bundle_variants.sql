@@ -1,5 +1,3 @@
-
-
 {{ config(database = 'redaspen_v2') }}
 
 {{ config(schema = 'bundles')}}
@@ -19,7 +17,7 @@ WHERE value = 'Bundle_Fixed'
 bundles AS(
     SELECT p.*
     FROM {{ ref("int_shopify__products") }} p JOIN bundle_tag bt ON p.product_id = bt.product_id
-    WHERE bt.value = 'Bundle'
+    WHERE bt.value = 'Bundle' OR bt.value = 'LoyaltyBox'
 ),
 bundle_variants AS(
     SELECT bv.id AS bundle_variant_id,
