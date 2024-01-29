@@ -55,9 +55,8 @@ norm_order_lines AS(SELECT id AS order_line_id,
     gift_card
 FROM order_lines ol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id -- Change to just sku join once duplicate products are eliminated
     LEFT JOIN {{ ref("redaspen_bundle_variants") }} b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
-WHERE bundle_type <> 'LoyaltyBox' -- All loyalty boxes will be within bundle properties
 )
-SELECT nol.order_line_id,   
+SELECT nol.order_line_id,
     nol.order_id,
     nol.shopify_product_id,
     nol.emma_product_id,
@@ -78,4 +77,3 @@ SELECT nol.order_line_id,
     nol.gift_card
 FROM norm_order_lines nol LEFT JOIN loyalty_box_object lbo ON nol.order_line_id = lbo.id AND nol.order_id = lbo.order_id
 
-    
