@@ -16,9 +16,9 @@ loyalty_box_sku AS(
         sku
     FROM loyalty_box_discount
 ),
-loyalty_box_object AS(ls.id,
+loyalty_box_object AS(SELECT ls.id,
     ls.order_id,
-    SELECT ARRAY_CONSTRUCT(OBJECT_CONSTRUCT('loyalty_box_order_id', ol.order_id::number,
+    ARRAY_CONSTRUCT(OBJECT_CONSTRUCT('loyalty_box_order_id', ol.order_id::number,
     'loyalty_box_order_line_id', ol.id::number,
     'loyalty_box_sku',ol.sku::string,
     'loyalty_box_title', ol.title::string,
