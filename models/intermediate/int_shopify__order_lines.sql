@@ -75,8 +75,7 @@ SELECT nol.order_line_id,
     nol.line_item_price_cents,
     nol.total_discount_cents,
     nol.pre_tax_price_cents,
-    nol.gift_card,
-    nol.source
+    nol.gift_card
 FROM norm_order_lines nol LEFT JOIN loyalty_box_object lbo ON nol.order_line_id = lbo.id AND nol.order_id = lbo.order_id
 
     
