@@ -16,6 +16,15 @@ loyalty_box_sku AS(
         sku
     FROM loyalty_box_discount
 ),
+bundles AS(
+    SELECT *
+    FROM {{ ref("redaspen_bundle_variants") }}
+    WHERE bundle_type <> 'LoyaltyBox'  --Loyalty Boxes will be included within bundle properties
+),
+products AS(
+    SELECT *
+    FROM {{ ref("redaspen_product_variants") }}
+),
 loyalty_box_object AS(SELECT ls.id,
     ls.order_id,
     ARRAY_CONSTRUCT(OBJECT_CONSTRUCT('loyalty_box_order_id', ol.order_id::number,
@@ -53,9 +62,8 @@ norm_order_lines AS(SELECT id AS order_line_id,
     total_discount*100 AS total_discount_cents,
     pre_tax_price*100 AS pre_tax_price_cents,
     gift_card
-FROM order_lines ol LEFT JOIN {{ ref("redaspen_product_variants") }} p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id -- Change to just sku join once duplicate products are eliminated
-    LEFT JOIN {{ ref("redaspen_bundle_variants") }} b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
-WHERE b.bundle_type <> 'LoyaltyBox' --Loyalty Boxes will be included within bundle properties
+FROM order_lines ol LEFT JOIN products p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id -- Change to just sku join once duplicate products are eliminated
+    LEFT JOIN bundles b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
 )
 SELECT nol.order_line_id,
     nol.order_id,
