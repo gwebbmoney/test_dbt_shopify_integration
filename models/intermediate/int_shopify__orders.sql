@@ -101,7 +101,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         END) AS order_adjustment_amount,
                         (CASE
                             WHEN SUM(tax_amount) IS NULL THEN 0
-                            ELSE SUM(amount)
+                            ELSE SUM(tax_amount)
                         END) AS order_adjustment_tax_amount
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     GROUP BY o.id, oa.kind
