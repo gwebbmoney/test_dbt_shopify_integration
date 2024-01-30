@@ -19,7 +19,6 @@ loyalty_box_sku AS(
 bundles AS(
     SELECT *
     FROM {{ ref("redaspen_bundle_variants") }}
-    WHERE bundle_type <> 'LoyaltyBox'  --Loyalty Boxes will be included within bundle properties
 ),
 products AS(
     SELECT *
@@ -64,6 +63,7 @@ norm_order_lines AS(SELECT id AS order_line_id,
     gift_card
 FROM order_lines ol LEFT JOIN products p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id -- Change to just sku join once duplicate products are eliminated
     LEFT JOIN bundles b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
+WHERE b.bundle_type IS NULL OR b.bundle_type IN ('Bundle_Fixed', 'Bundle', 'Bundle_Custom')
 )
 SELECT nol.order_line_id,
     nol.order_id,
