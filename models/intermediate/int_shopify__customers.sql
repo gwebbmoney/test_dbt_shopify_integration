@@ -24,9 +24,8 @@ ORDER BY m.owner_id
 customer_tag AS(SELECT customer_id,
                     MAX(SELECT REGEXP_SUBSTR(value, 'partner_site:\s*([^"]*)', 1, 1, 'i', 1)) AS partner_site,
                     MAX(SELECT REGEXP_SUBSTR(value, 'site:\s*([^"]*)', 1, 1, 'i', 1)) AS site
-                FROM FIVETRAN_SHOPIFY_RAW_DATA.SHOPIFY.CUSTOMER_TAG
+                FROM {{source('shopify_raw', 'CUSTOMER_TAG')}}
                 GROUP BY customer_id
-                ORDER BY customer_id
 ),
 customer_address AS(SELECT customer_id,
                     address_1,
@@ -43,12 +42,7 @@ customer_address AS(SELECT customer_id,
 SELECT c.id AS customer_id,
     c.email,
     c.first_name,
-    c.last_name,/*
-    (CASE
-        WHEN ct.value = 'partner_user' THEN value
-        WHEN ct.value = 'Affiliate' THEN value
-        WHEN ct.value = 'former_partner' THEN value
-    END) as shopify_distributor_status,*/
+    c.last_name,
     cd.distributor_id AS brand_ambassador_id,
     ct.site,
     cd.sponsor_id AS sponsor_id,
