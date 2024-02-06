@@ -35,4 +35,4 @@ SELECT sc.customer_id AS shopify_customer_id,
     sc.created_at,
     sc.updated_at,
     sc.metafield
-FROM shopify_customers sc FULL OUTER JOIN redaspen_distributors rd ON sc.brand_ambassador_id = rd.distributor_id
+FROM shopify_customers sc LEFT JOIN redaspen_distributors rd ON sc.brand_ambassador_id = rd.distributor_id
