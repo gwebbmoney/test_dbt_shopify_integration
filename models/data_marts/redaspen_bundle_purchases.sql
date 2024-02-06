@@ -10,6 +10,13 @@ WHERE bundle_properties IS NOT NULL
     AND source = 'Infotrax'
 GROUP BY bundle_order_line_id, ol.order_id
 ),
+loyalty_box_array AS(SELECT ARRAY_AGG(ol.sku) AS product_sku_array,
+                        ol.order_id,
+                        ol.bundle_properties 
+            FROM {{ ref('redaspen_order_lines') }} ol
+            WHERE ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
+            GROUP BY ol.bundle_properties, ol.order_id
+),
 bundle_union AS(
     SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS bundle_order_line_id,
         ol.bundle_properties[0]['infotrax_order_number'] AS order_id,
@@ -53,10 +60,22 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
             SPLIT(ol.bundle_properties[4]['value'], ',') AS product_sku_array,
             ol.bundle_properties[3]['value']::number AS quantity_ordered,
             source
-    FROM {{ ref("redaspen_order_lines") }} ol
+    FROM {{ ref("redaspen_order_lines") }} ol 
     WHERE source = 'Shopify'
         AND ARRAY_SIZE(ol.bundle_properties) > 0
         AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL)
+UNION
+SELECT ol.bundle_properties[0]['loyalty_box_order_line_id'] AS order_line_id,
+    ol.bundle_properties[0]['loyalty_box_order_id'] AS order_id,
+    ol.bundle_properties[0]['loyalty_box_price']*100 AS price_cents,
+    ol.bundle_properties[0]['loyalty_box_order_quantity'] AS quantity_ordered,
+    ol.bundle_properties[0]['loyalty_box_sku'] AS bundle_sku,
+    ol.bundle_properties[0]['loyalty_box_title'] AS bundle_name,
+    ol.bundle_properties[0]['loyalty_box_total'] AS pre_tax_price_cents,
+    lba.product_sku_array,
+    ol.source
+FROM {{ ref("redaspen_order_lines") }} ol RIGHT JOIN loyalty_box_array lba ON ol.order_id = lba.order_id
+WHERE ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
 )
 SELECT bu.bundle_order_line_id,
     bu.order_id,
@@ -72,7 +91,3 @@ SELECT bu.bundle_order_line_id,
 FROM bundle_union bu /*LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title */ --We need a better way to categorize loyalty boxes. We have overlapping skus, which is the only item that Infotrax order lines connects on for product id's.
 LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
-
-
-
-
