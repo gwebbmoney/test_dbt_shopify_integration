@@ -1,8 +1,6 @@
-
-
 {{ config(database = 'redaspen_v2') }}
 
-{{ config(schema = 'bundles')}}
+{{ config(schema = 'bundles') }}
 
 WITH infotrax_array AS(SELECT ol.bundle_properties[0]['bundle_order_line_id'] AS bundle_order_line_id,
     ol.order_id,
@@ -57,7 +55,8 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
             source
     FROM {{ ref("redaspen_order_lines") }} ol
     WHERE source = 'Shopify'
-        AND ARRAY_SIZE(ol.bundle_properties) > 0)
+        AND ARRAY_SIZE(ol.bundle_properties) > 0
+        AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL)
 )
 SELECT bu.bundle_order_line_id,
     bu.order_id,
@@ -68,11 +67,10 @@ SELECT bu.bundle_order_line_id,
     CAST(bu.pre_tax_price_cents AS NUMBER) AS pre_tax_price_cents,
     array_sort(bu.product_sku_array) AS product_sku_array,
     bu.source,
-    bv.bundle_type,
     o.distributor_status,
     o.created_at
-FROM bundle_union bu LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
-    OR bu.bundle_name = bv.shopify_bundle_title 
+FROM bundle_union bu /*LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
+    OR bu.bundle_name = bv.shopify_bundle_title */ --We need a better way to categorize loyalty boxes. We have overlapping skus, which is the only item that Infotrax order lines connects on for product id's.
 LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
 
 
