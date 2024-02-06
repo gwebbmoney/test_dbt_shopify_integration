@@ -9,7 +9,7 @@ redaspen_distributors AS(
     SELECT * FROM {{ ref("int_redaspen__distributors") }}
 )
 SELECT sc.customer_id AS shopify_customer_id,
-    (CAST(sc.brand_ambassador_id) AS NUMBER) AS brand_ambassador_id,
+    CAST(sc.brand_ambassador_id AS NUMBER) AS brand_ambassador_id,
     rd.email_address AS infotrax_email,
     sc.email AS shopify_email,
     sc.first_name,
