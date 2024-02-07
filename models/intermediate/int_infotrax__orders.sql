@@ -92,7 +92,7 @@ SELECT oi.infotrax_order_number AS order_id,
     ship_to_city AS shipping_address_city,
     ship_to_state AS shipping_address_state,
     ship_to_zip AS shipping_address_zip,
-    distributor_id AS brandambassadorid,
+    distributor_id AS brand_ambassador_id,
     distributor_status
 FROM order_integration oi
 

@@ -125,6 +125,11 @@ distributor_status_metafield AS(
     END) AS distributor_status
 FROM {{ source('shopify_raw', 'METAFIELD') }}
 WHERE value IN ('Consumer Order', 'Distributor Order', 'Affiliate Order')
+),
+customers AS(
+    SELECT shopify_customer_id,
+        brand_ambassador_id
+    FROM {{ref('redaspen_distributors')}}
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -171,6 +176,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.billing_address_longitude,
     o.billing_address_latitude,
     o.customer_id,
+    c.brand_ambassador_id,
     o.user_id,
     o.checkout_id,
     dsm.distributor_status,
@@ -200,6 +206,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN order_tag_cond otc ON oi.id = otc.order_id
     LEFT JOIN distributor_status_metafield dsm ON oi.id = dsm.order_id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
+    LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
 WHERE o._fivetran_deleted = FALSE
 --AND o.test = FALSE
 
