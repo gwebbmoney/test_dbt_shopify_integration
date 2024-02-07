@@ -71,7 +71,7 @@ SELECT ol.bundle_properties[0]['loyalty_box_order_line_id'] AS order_line_id,
     ol.bundle_properties[0]['loyalty_box_order_quantity'] AS quantity_ordered,
     ol.bundle_properties[0]['loyalty_box_sku'] AS bundle_sku,
     ol.bundle_properties[0]['loyalty_box_title'] AS bundle_name,
-    ol.bundle_properties[0]['loyalty_box_total'] AS pre_tax_price_cents,
+    ol.bundle_properties[0]['loyalty_box_total']*100 AS pre_tax_price_cents,
     lba.product_sku_array,
     ol.source
 FROM {{ ref("redaspen_order_lines") }} ol RIGHT JOIN loyalty_box_array lba ON ol.order_id = lba.order_id
