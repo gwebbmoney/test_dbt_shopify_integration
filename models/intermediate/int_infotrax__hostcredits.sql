@@ -8,6 +8,6 @@ order_lines AS(
 SELECT po.order_id,
     (ol.retail_amount_cents * -1) AS hostcredit_amount_cents,
     po.created_at,
-    po.brandambassadorid,
+    po.brand_ambassador_id,
     po.distributor_status
 FROM order_lines ol JOIN processed_orders po ON ol.infotrax_order_number = po.order_id

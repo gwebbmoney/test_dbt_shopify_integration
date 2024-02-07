@@ -9,5 +9,5 @@ processed_orders AS(
 SELECT t.order_id,
     t.amount AS hostcredit_amount_cents,
     t.created_at,
-    po.brandambassadorid
+    po.brand_ambassador_id
 FROM transactions t JOIN processed_orders po ON t.order_id = po.order_id
