@@ -64,10 +64,16 @@ SELECT pol.id AS order_line_id,
     pol.infotrax_sku AS sku,
     pol.order_line,
     pol.properties AS bundle_properties,
-    pol.retail_amount_cents AS price_cents,
+    (CASE
+        WHEN bundle_properties is not null AND pol.kit_line > 0 THEN emma_price_cents
+        ELSE pol.retail_amount_cents
+    END) AS price_cents,
     pol.quantity_ordered,
     (price_cents * quantity_ordered) AS line_item_price_cents,
-    line_item_price_cents AS pre_tax_price_cents, --Need to rename or move this column
+    (CASE
+        WHEN pol.kit_line > 0 THEN pol.bundle_product_allocation_revenue_cents
+        ELSE line_item_price_cents
+    END) AS pre_tax_price_cents,
     (line_item_price_cents - pre_tax_price_cents) AS total_discount_cents,
     pol.skuable_type
 FROM product_order_line pol
