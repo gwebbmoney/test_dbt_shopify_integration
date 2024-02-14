@@ -64,8 +64,8 @@ norm_order_lines AS(SELECT id AS order_line_id,
 FROM order_lines ol LEFT JOIN products p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id -- Change to just sku join once duplicate products are eliminated
     LEFT JOIN bundles b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
 WHERE b.bundle_type IS NULL OR b.bundle_type IN ('Bundle_Fixed', 'Bundle', 'Bundle_Custom')
-)
-SELECT nol.order_line_id,
+),
+order_lines_rough AS(SELECT nol.order_line_id,
     nol.order_id,
     nol.shopify_product_id,
     nol.emma_product_id,
@@ -85,4 +85,46 @@ SELECT nol.order_line_id,
     nol.pre_tax_price_cents,
     nol.gift_card
 FROM norm_order_lines nol LEFT JOIN loyalty_box_object lbo ON nol.order_line_id = lbo.id AND nol.order_id = lbo.order_id
+),
+loyalty_box_join AS(SELECT order_id,
+                        bundle_properties,
+                        SUM(line_item_price_cents) AS loyalty_box_product_price
+                    FROM order_lines_rough
+                    WHERE bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
+                    GROUP BY order_id, bundle_properties
+),
+percentage_allocation AS(SELECT ol.order_line_id,
+                            ol.order_id,
+                            ol.line_item_price_cents,
+                            ol.bundle_properties,
+                            DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) AS allocated_percentage,
+                            (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_total']) AS pre_tax_price_cents
+                    FROM loyalty_box_join lbj JOIN order_lines_rough ol ON lbj.order_id = ol.order_id 
+                        AND lbj.bundle_properties = ol.bundle_properties
+)
+SELECT ol.order_line_id,
+    ol.order_id,
+    ol.shopify_product_id,
+    ol.emma_product_id,
+    ol.product_variant_id,
+    ol.product_name,
+    ol.product_variant_name,
+    ol.sku,
+    ol.bundle_properties,
+    ol.order_line,
+    ol.bundle_type,
+    ol.product_tag,
+    ol.price_cents,
+    ol.quantity_ordered,
+    ol.fulfillable_quantity,
+    ol.line_item_price_cents,
+    ol.total_discount_cents,
+    (CASE
+        WHEN ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL THEN pa.pre_tax_price_cents*100
+        ELSE ol.pre_tax_price_cents
+    END) AS pre_tax_price_cents,
+    ol.gift_card
+FROM order_lines_rough ol LEFT JOIN percentage_allocation pa ON ol.order_line_id = pa.order_line_id
+    AND ol.bundle_properties = pa.bundle_properties
+
 
