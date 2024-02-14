@@ -44,5 +44,5 @@ SELECT
     original_order as infotrax_original_order,
     _fivetran_deleted
 FROM {{ source('raw_infotrax', 'ORDERMASTER') }}
-WHERE entry_date >= '2020-01-01'
+WHERE date_from_parts(left(bonus_period,4),right(bonus_period,2),1) >= '2020-01-01'
     AND _fivetran_deleted = FALSE
