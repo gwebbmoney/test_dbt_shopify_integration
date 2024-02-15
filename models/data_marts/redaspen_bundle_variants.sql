@@ -38,7 +38,7 @@ select
     coalesce(b.sku, bv.sku) as sku,
     coalesce(bundle_type, skuable_type) as bundle_type,
     (
-        case when product_id = emma_id then 'Infotrax' else 'Shopify' end
+        case when b.product_id = emma_id then 'Infotrax' else 'Shopify' end
     ) as bundle_source
 from bundle_variants bv
 full outer join {{ ref("int_infotrax__products") }} b on bv.sku = b.sku

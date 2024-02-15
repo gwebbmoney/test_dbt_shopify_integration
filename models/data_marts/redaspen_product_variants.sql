@@ -24,7 +24,7 @@ product_variants AS(
     FROM products p JOIN {{ source('shopify_raw', 'PRODUCT_VARIANT') }} pv ON p.product_id = pv.product_id
         LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON p.product_id = bv.shopify_bundle_id
     WHERE bv.shopify_bundle_id IS NULL
-        AND bv.emma_bundle_id IS NULL
+        AND bv.emma_id IS NULL
 )
 SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_product_id,
     pv.product_id AS shopify_product_id,
