@@ -37,7 +37,11 @@ SELECT CAST(COALESCE(b.product_id, bv.emma_bundle_id) AS number) AS emma_bundle_
     bv.bundle_variant_id AS shopify_bundle_variant_id,
     bv.bundle_variant_title AS shopify_bundle_variant_title,
     COALESCE(b.sku, bv.sku) AS sku,
-    COALESCE(bundle_type, skuable_type) AS bundle_type
+    COALESCE(bundle_type, skuable_type) AS bundle_type,
+    (CASE
+        WHEN bundle_title = b.product_title THEN 'Infotrax'
+        ELSE 'Shopify'
+    END) AS bundle_source
 FROM bundle_variants bv FULL OUTER JOIN {{ ref('int_infotrax__products') }} b ON bv.sku = b.sku
 WHERE bundle_type IN ('Bundle_Custom', 'Bundle_Fixed', 'LoyaltyBox')
     OR skuable_type = 'Bundle'

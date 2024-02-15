@@ -18,6 +18,7 @@ loyalty_box_array AS(SELECT ARRAY_AGG(ol.sku) AS product_sku_array,
             GROUP BY ol.bundle_properties, ol.order_id
 ),
 bundle_union AS(
+    --Infotrax Bundles with Components
     SELECT DISTINCT(ol.bundle_properties[0]['bundle_order_line_id']) AS bundle_order_line_id,
         ol.bundle_properties[0]['infotrax_order_number'] AS order_id,
         ol.bundle_properties[0]['price'] AS price_cents,
@@ -30,6 +31,7 @@ bundle_union AS(
     FROM {{ ref("redaspen_order_lines") }} ol LEFT JOIN infotrax_array ia ON ol.bundle_properties[0]['bundle_order_line_id'] = ia.bundle_order_line_id
     WHERE source = 'Infotrax'
 UNION
+    --Infotrax Bundles with no Components
     SELECT order_line_id,
         order_id,
         price_cents,
@@ -44,6 +46,7 @@ UNION
         AND bundle_properties IS NULL
         OR ARRAY_SIZE(bundle_properties) = 0
 UNION
+--Shopify Bundles with Components
 SELECT NULL AS order_line_id,
     order_id,
     price_cents,
@@ -65,6 +68,7 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
         AND ARRAY_SIZE(ol.bundle_properties) > 0
         AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL)
 UNION
+--Shopify Loyalty Box
 SELECT ol.bundle_properties[0]['loyalty_box_order_line_id'] AS order_line_id,
     ol.bundle_properties[0]['loyalty_box_order_id'] AS order_id,
     ol.bundle_properties[0]['loyalty_box_price']*100 AS price_cents,
@@ -91,3 +95,4 @@ SELECT bu.bundle_order_line_id,
 FROM bundle_union bu /*LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title */ --We need a better way to categorize loyalty boxes. We have overlapping skus, which is the only item that Infotrax order lines connects on for product id's.
 LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
+
