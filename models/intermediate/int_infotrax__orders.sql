@@ -79,6 +79,7 @@ SELECT oi.infotrax_order_number AS order_id,
     (CASE
         WHEN order_source = 903 THEN 'Subscription_Order'
         WHEN order_source = 905 THEN 'Enrollment_Order'
+        WHEN order_source IN (907, 915) THEN 'Pop-up'
     END) AS order_tag_type,
     refund_subtotal_amount AS subtotal_refund_cents,
     refund_discount_amount AS discount_refund_cents,
