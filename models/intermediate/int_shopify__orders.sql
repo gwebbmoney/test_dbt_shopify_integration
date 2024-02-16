@@ -209,7 +209,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
     LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
 WHERE o._fivetran_deleted = FALSE
---AND o.test = FALSE
+    AND o.test = FALSE
 
 
 
