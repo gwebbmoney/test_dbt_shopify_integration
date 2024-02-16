@@ -112,6 +112,7 @@ order_tag_cond AS(
         WHEN value = 'Subscription First Order' THEN 'Subscription_First_Order'
         WHEN value = 'Subscription Recurring Order' THEN 'Subscription_Recurring_Order'
         WHEN value = 'Enrollment Order' THEN 'Enrollment_Order'
+        WHEN value = 'Pop-Up Code' THEN 'Pop-up'
     END) AS order_tag_type
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
 WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
