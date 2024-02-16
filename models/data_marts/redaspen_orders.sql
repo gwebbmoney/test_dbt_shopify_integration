@@ -6,8 +6,8 @@
 
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__orders'), ref('int_infotrax__orders')]
-)}})
-SELECT ORDER_ID,
+)}}),
+column_order AS(SELECT ORDER_ID,
 ORDER_NUMBER,
 SUBTOTAL_AMOUNT_CENTS,
 SALES_TAX_AMOUNT_CENTS,
@@ -77,8 +77,7 @@ _FIVETRAN_DELETED,
 _FIVETRAN_SYNCED,
 DISCOUNT_REFUND_CENTS
 FROM data_union
-
-
-
-
-
+)
+SELECT *
+FROM column_order
+WHERE NOT (source = 'Infotrax' AND order_id::string IN(SELECT LTRIM(infotrax_order_number_reference) FROM column_order WHERE source = 'Shopify'))
