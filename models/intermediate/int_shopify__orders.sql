@@ -115,7 +115,7 @@ order_tag_cond AS(
         WHEN value = 'Pop-Up Code' THEN 'Pop-up'
     END) AS order_tag_type
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
-WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
+WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order', 'Pop-Up Code')
 ),
 distributor_status_metafield AS(
     SELECT DISTINCT(owner_id) AS order_id,
