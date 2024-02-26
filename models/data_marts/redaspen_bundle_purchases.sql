@@ -59,14 +59,15 @@ SELECT NULL AS order_line_id,
 FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
             ol.order_id,
             ol.bundle_properties[0]['value']::varchar AS bundle_name,
-            CAST(REGEXP_REPLACE(ol.bundle_properties[1]['value'], '\\$', '')*100 AS NUMBER) AS price_cents,
+            CAST(REGEXP_REPLACE(ol.bundle_properties[1]['value'], '\\$', '')*100 AS number) AS price_cents,
             SPLIT(ol.bundle_properties[4]['value'], ',') AS product_sku_array,
             ol.bundle_properties[3]['value']::number AS quantity_ordered,
             source
     FROM {{ ref("redaspen_order_lines") }} ol 
     WHERE source = 'Shopify'
         AND ARRAY_SIZE(ol.bundle_properties) > 0
-        AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL)
+        AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL
+        AND TRY_CAST(REGEXP_REPLACE(ol.bundle_properties[1]['value'], '\\$', '') AS NUMBER) is not null
 UNION
 --Shopify Loyalty Box
 SELECT ol.bundle_properties[0]['loyalty_box_order_line_id'] AS order_line_id,
@@ -83,11 +84,11 @@ WHERE ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
 )
 SELECT bu.bundle_order_line_id,
     bu.order_id,
-    CAST(bu.price_cents AS NUMBER) AS price_cents,
+    CAST(bu.price_cents AS number) AS price_cents,
     bu.quantity_ordered,
     bu.bundle_sku,
     bu.bundle_name,
-    CAST(bu.pre_tax_price_cents AS NUMBER) AS pre_tax_price_cents,
+    CAST(bu.pre_tax_price_cents AS number) AS pre_tax_price_cents,
     array_sort(bu.product_sku_array) AS product_sku_array,
     bu.source,
     o.distributor_status,
@@ -95,4 +96,5 @@ SELECT bu.bundle_order_line_id,
 FROM bundle_union bu /*LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title */ --We need a better way to categorize loyalty boxes. We have overlapping skus, which is the only item that Infotrax order lines connects on for product id's.
 LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
+--Cast as number once fixes are made
 
