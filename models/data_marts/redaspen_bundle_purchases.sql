@@ -67,7 +67,7 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
     WHERE source = 'Shopify'
         AND ARRAY_SIZE(ol.bundle_properties) > 0
         AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL
-        AND TRY_CAST(REGEXP_REPLACE(ol.bundle_properties[1]['value'], '\\$', '') AS NUMBER)) is not null
+        AND TRY_CAST(REGEXP_REPLACE(ol.bundle_properties[1]['value'], '\\$', '') AS NUMBER) IS NOT NULL) 
 UNION
 --Shopify Loyalty Box
 SELECT ol.bundle_properties[0]['loyalty_box_order_line_id'] AS order_line_id,
