@@ -1,5 +1,3 @@
-
-
 {{ config(database = 'redaspen_v2') }}
 
 {{ config(schema = 'products')}}
