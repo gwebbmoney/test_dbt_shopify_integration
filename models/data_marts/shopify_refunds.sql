@@ -1,5 +1,3 @@
-
-
 {{ config(database = 'redaspen') }}
 
 {{ config(schema = 'transaction_metrics')}}
