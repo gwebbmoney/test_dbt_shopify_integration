@@ -58,7 +58,7 @@ norm_order_lines AS(SELECT id AS order_line_id,
     quantity AS quantity_ordered,
     fulfillable_quantity,
     (price_cents * quantity) AS line_item_price_cents,
-    total_discount*100 AS total_discount_cents,
+    (line_item_price_cents - pre_tax_price*100) AS total_discount_cents,
     pre_tax_price*100 AS pre_tax_price_cents,
     gift_card
 FROM order_lines ol LEFT JOIN products p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id 
