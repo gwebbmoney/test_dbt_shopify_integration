@@ -3,7 +3,7 @@
 {{ config(schema = 'orders')}}
 
 WITH orders AS(
-    SELECT * FROM {{ ref("redaspen_orders") }}
+    SELECT * FROM {{ ref("shopify_orders") }}
 )
 SELECT *
 FROM orders
