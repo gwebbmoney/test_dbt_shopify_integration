@@ -19,9 +19,6 @@ SELECT ORDER_ID,
     REFUND_TAX_CENTS,
     PRE_TAX_REFUND_CENTS,
     BUNDLE_PROPERTIES,
-    REFUND_ORDER_LINE,
-    QUANTITY_RETURNED,
-    LINE_ITEM_PRICE_CENTS,
     (CASE
         WHEN _DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.dbt_shopify_transformations.int_infotrax__order_line_refund' THEN 'Infotrax'
         ELSE 'Shopify'
