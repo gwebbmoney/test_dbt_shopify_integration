@@ -112,10 +112,18 @@ order_tag_cond AS(
         WHEN value = 'Subscription First Order' THEN 'Subscription_First_Order'
         WHEN value = 'Subscription Recurring Order' THEN 'Subscription_Recurring_Order'
         WHEN value = 'Enrollment Order' THEN 'Enrollment_Order'
-        --WHEN value = 'Pop-Up Code' THEN 'Pop-up'
     END) AS order_tag_type
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
-WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')/*, 'Pop-Up Code'*/
+WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
+),
+redeemed_pop_up AS(
+    SELECT DISTINCT(order_id) AS order_id,
+    (CASE
+        WHEN value = 'Pop-Up Code' THEN TRUE 
+        ELSE FALSE
+    END) AS redeemed_pop_up_reward
+FROM {{ source("shopify_raw", 'ORDER_TAG') }}
+WHERE value ='Pop-Up Code'
 ),
 distributor_status_metafield AS(
     SELECT DISTINCT(owner_id) AS order_id,
@@ -186,6 +194,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.app_id,
     o.buyer_accepts_marketing,
     otc.order_tag_type,
+    rpu.redeemed_pop_up_reward,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"SponsorID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS sponsor_id,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"PartyID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS partyid,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"HostID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS hostid,
@@ -205,6 +214,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
     LEFT JOIN order_tag_cond otc ON oi.id = otc.order_id
+    LEFT JOIN redeemed_pop_up rpu ON oi.id = rpu.order_id
     LEFT JOIN distributor_status_metafield dsm ON oi.id = dsm.order_id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
     LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
