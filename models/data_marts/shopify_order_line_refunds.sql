@@ -1,4 +1,3 @@
-
 {{ config(database = 'redaspen') }}
 
 {{ config(schema = 'orders')}}
