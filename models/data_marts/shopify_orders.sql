@@ -83,4 +83,4 @@ WHERE NOT (source = 'Infotrax' AND order_id::string IN(SELECT LTRIM(infotrax_ord
 )
 SELECT *
 FROM final
-WHERE test = FALSE
+WHERE test = FALSE OR test IS NULL
