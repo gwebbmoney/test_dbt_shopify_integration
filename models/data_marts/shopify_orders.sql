@@ -76,7 +76,11 @@ _FIVETRAN_DELETED,
 _FIVETRAN_SYNCED,
 DISCOUNT_REFUND_CENTS
 FROM data_union
-)
-SELECT *
+),
+final AS(SELECT *
 FROM column_order
 WHERE NOT (source = 'Infotrax' AND order_id::string IN(SELECT LTRIM(infotrax_order_number_reference) FROM column_order WHERE source = 'Shopify'))
+)
+SELECT *
+FROM final
+WHERE test = FALSE
