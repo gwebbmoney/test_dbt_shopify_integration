@@ -5,7 +5,7 @@
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__order_lines'), ref('int_infotrax__order_lines')]
 )}})
-SELECT SELECT du.ORDER_LINE_ID,
+SELECT du.ORDER_LINE_ID,
 du.ORDER_ID,
 o.ORDER_NUMBER,
 du.SHOPIFY_PRODUCT_ID,
