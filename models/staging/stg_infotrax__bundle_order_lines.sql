@@ -2,6 +2,7 @@ WITH
 orders AS(SELECT *
         FROM {{ ref("stg_infotrax__orders") }}
         WHERE order_source <> 904
+--Takes infotrax orders and takes away RMA's and refunds
 ),
 bundle_product_orders AS(SELECT ol.infotrax_order_number,
                         ol.id,
@@ -20,8 +21,9 @@ bundle_product_orders AS(SELECT ol.infotrax_order_number,
                 FROM {{ ref("stg_infotrax__order_lines") }} ol LEFT JOIN {{ source('redaspen', 'SKUS') }} sk ON ol.infotrax_sku = sk.name
                     JOIN orders o ON ol.infotrax_order_number = o.infotrax_order_number
                 WHERE sk.skuable_type = 'Bundle' OR ol.component_status IN ('M', 'P')
-                    AND ol.kit_line = 0
+                    AND ol.kit_line = 0 --If kit_line = 0, then it is the start of the bundle
                     AND o.bonus_period >= '2020-01-01'
+--Takes all bundles in order lines. Products that are shown in these bundles will be linked to the bundle purchase on the line item level.
                 UNION 
                     SELECT ol.infotrax_order_number,
                         ol.id,
@@ -39,20 +41,24 @@ bundle_product_orders AS(SELECT ol.infotrax_order_number,
                         ol.component_status
                 FROM {{ ref("stg_infotrax__order_lines") }} ol LEFT JOIN {{ source('redaspen', 'SKUS') }} sk ON ol.infotrax_sku = sk.name
                     JOIN orders o ON ol.infotrax_order_number = o.infotrax_order_number
-                WHERE ol.kit_line > 0
+                WHERE ol.kit_line > 0 --If kit_line > 0, then it is associated with a bundle
                     AND o.bonus_period >= '2020-01-01'
+--Takes all products that are associated with a bundle purchase.
+--Bundles and products are joined together via the UNION statement.
 ),
 product_suggested_price AS(SELECT p.id,
                         sk.name AS sku,
                         p.price
                     FROM {{ source("redaspen", "PRODUCTS") }} p LEFT JOIN {{ source("redaspen", "SKUS") }} sk ON p.id = sk.skuable_id
                     WHERE sk.skuable_type = 'Product'
+--Takes the price of every product
 ),
 bundle_suggested_price AS(SELECT b.id,
                             sk.name AS sku,
                             b.price
                     FROM {{ source("redaspen", "BUNDLES") }} b LEFT JOIN {{ source("redaspen", "SKUS") }} sk ON b.id = sk.skuable_id
                     WHERE sk.skuable_type = 'Bundle'
+--Takes the price of every bundle
 ),
 bundle_product_lines AS(SELECT bpo.infotrax_order_number,
     bpo.id,
@@ -88,6 +94,7 @@ FROM bundle_product_orders bpo LEFT JOIN product_suggested_price psg ON bpo.info
     LEFT JOIN bundle_suggested_price bsg ON bpo.infotrax_sku = bsg.sku
 ORDER BY bpo.infotrax_order_number,
     bpo.order_line
+--Associates price metrics with each product that is associated with a bundle.
 ),
 bundle_components AS(SELECT bpl.infotrax_order_number,
                     bpl.id,
@@ -100,6 +107,9 @@ bundle_components AS(SELECT bpl.infotrax_order_number,
                     WHEN bpl.kit_line = 0 THEN bundle_sku
                 END) AS bundle_product_number
 FROM bundle_product_lines bpl
+--For each product purchased within a bundle, the bundle sku is associated with each product.
+--Example: Bundle Sku = 1000, and Products A and B are within this bundle purchase. The bundle sku of A and B are now 1000.
+--The reason we do this is so that we can associate each product within a bundle purchase.
 ),
 sum_allocation AS(SELECT (CASE 
                             WHEN it.product_line_sum_dollars IS NULL AND bc.skuable_type = 'Bundle' THEN bc.suggested_price_dollars
@@ -118,7 +128,9 @@ sum_allocation AS(SELECT (CASE
                     WHERE bpl.kit_line > 0
                     GROUP BY bpl.infotrax_order_number, bc.bundle_product_number, bpl.promo_id
                     ) it RIGHT JOIN bundle_components bc ON it.infotrax_order_number = bc.infotrax_order_number
-                        AND it.bundle_product_number = bc.bundle_product_number and it.promo_id = bc.promo_id 
+                        AND it.bundle_product_number = bc.bundle_product_number and it.promo_id = bc.promo_id
+--Takes the total sum of the product line item prices
+--Example: Product A = $25 and Product B = $20. The product_line_sum_dollars = $45
 ),
 price_allocation AS(SELECT bpl.infotrax_order_number,
     bpl.order_line,
@@ -127,6 +139,9 @@ price_allocation AS(SELECT bpl.infotrax_order_number,
     COALESCE((nullif(suggested_price_dollars,0) / nullif((product_line_sum_dollars),0)),0) AS product_price_allocation_percent
 FROM bundle_product_lines bpl JOIN sum_allocation sa ON bpl.infotrax_order_number = sa.infotrax_order_number
     AND bpl.order_line = sa.order_line
+--Calculates price percentage of each product line item price divided by the total product line item sum
+--Example: Total line item sum = $45. Product A had a price of $20. $20/$45 = product_price_allocation_percent
+--This percentage will be multiplied by the actual retail price of the product's associated bundle
 ),
 bundle_order_line AS(SELECT bpl.infotrax_order_number,
                         bpl.id,
@@ -140,6 +155,7 @@ bundle_order_line AS(SELECT bpl.infotrax_order_number,
                 FROM bundle_product_lines bpl LEFT JOIN bundle_components bc ON bpl.infotrax_order_number = bc.infotrax_order_number
                     AND bpl.order_line = bc.order_line AND bpl.promo_id = bc.promo_id
                 WHERE bpl.kit_line = 0
+--Grabs all of the bundle information
 ),
 bundle_order_price_comp AS(SELECT DISTINCT(bc.id),
     bc.infotrax_order_number,
@@ -154,6 +170,7 @@ bundle_order_price_comp AS(SELECT DISTINCT(bc.id),
 FROM bundle_order_line bol RIGHT JOIN bundle_components bc ON bol.infotrax_order_number = bc.infotrax_order_number
     AND bol.bundle_product_number = bc.bundle_product_number AND bol.promo_id = bc.promo_id
 WHERE absolute_value = bc.kit_line
+--
 ),
 bundle_order_price AS(
 SELECT *,
