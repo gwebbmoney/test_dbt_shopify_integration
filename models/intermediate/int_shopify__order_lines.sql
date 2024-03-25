@@ -9,6 +9,18 @@ loyalty_box_discount AS(
     FROM {{ source('shopify_raw', 'DISCOUNT_ALLOCATION') }} dal JOIN order_lines ol ON dal.order_line_id = ol.id
         JOIN {{ source('shopify_raw', 'DISCOUNT_APPLICATION') }} dap ON dap.order_id = ol.order_id AND dap.index = dal.discount_application_index
 ),
+bundle_discounts AS(
+    SELECT dap.order_id,
+        dal.order_line_id,
+        dal.discount_application_index,
+        SUM(dal.amount)*100 AS bundle_discount
+    FROM {{ source('shopify_raw', 'DISCOUNT_ALLOCATION') }} dal JOIN order_lines ol ON dal.order_line_id = ol.id
+        JOIN {{ source('shopify_raw', 'DISCOUNT_APPLICATION') }} dap ON dap.order_id = ol.order_id AND dap.index = dal.discount_application_index
+    WHERE dap.target_selection = 'explicit'
+        AND dap.target_type = 'line_item'
+        AND dap.allocation_method = 'across'
+    GROUP BY dap.order_id, dal.order_line_id, dal.discount_application_index
+),
 loyalty_box_sku AS(
     SELECT LTRIM(loyalty_box_array[1]::string) AS loyalty_box_sku,
         order_id,
@@ -32,6 +44,7 @@ loyalty_box_object AS(SELECT ls.id,
     'loyalty_box_title', ol.title::string,
     'loyalty_box_order_quantity', ol.quantity::number,
     'loyalty_box_price', ol.price::number,
+    'loyalty_box_subtotal', (ol.price*ol.quantity)::number,
     'loyalty_box_total', ol.pre_tax_price::number)) AS loyalty_box_properties
     FROM loyalty_box_sku ls JOIN order_lines ol ON ls.order_id = ol.order_id AND ls.loyalty_box_sku = ol.sku
 ),
@@ -58,7 +71,7 @@ norm_order_lines AS(SELECT id AS order_line_id,
     quantity AS quantity_ordered,
     fulfillable_quantity,
     (price_cents * quantity) AS line_item_price_cents,
-    (line_item_price_cents - pre_tax_price*100) AS total_discount_cents,
+    total_discount*100 AS total_discount_cents,
     pre_tax_price*100 AS pre_tax_price_cents,
     gift_card
 FROM order_lines ol LEFT JOIN products p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id 
@@ -97,12 +110,13 @@ percentage_allocation AS(SELECT ol.order_line_id,
                             ol.order_id,
                             ol.line_item_price_cents,
                             ol.bundle_properties,
-                            DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) AS allocated_percentage,
-                            (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_total']) AS pre_tax_price_cents
+                            DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) AS allocated_percentage, --Used to calculate product price on the line item level for loyalty box purchases
+                            (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_subtotal']) AS subtotal_price,
+                            (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_total']) AS pre_tax_price
                     FROM loyalty_box_join lbj JOIN order_lines_rough ol ON lbj.order_id = ol.order_id 
                         AND lbj.bundle_properties = ol.bundle_properties
-)
-SELECT ol.order_line_id,
+),
+final AS(SELECT ol.order_line_id,
     ol.order_id,
     ol.shopify_product_id,
     ol.emma_product_id,
@@ -118,13 +132,46 @@ SELECT ol.order_line_id,
     ol.quantity_ordered,
     ol.fulfillable_quantity,
     ol.line_item_price_cents,
-    ol.total_discount_cents,
     (CASE
-        WHEN ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL THEN pa.pre_tax_price_cents*100
+        WHEN ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL THEN round(ol.line_item_price_cents - (pa.subtotal_price*100), 2)
+        ELSE coalesce(bd.bundle_discount, 0)
+    END) AS bundle_discount_cents,
+    (CASE
+        WHEN ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL THEN round(pa.subtotal_price*100, 2)
+        ELSE ol.line_item_price_cents - bundle_discount_cents
+    END) AS subtotal_price_cents,
+    (CASE
+        WHEN ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL THEN round(pa.pre_tax_price*100, 2)
         ELSE ol.pre_tax_price_cents
-    END) AS pre_tax_price_cents,
+    END) AS pre_tax_price_cents_f,
+    (CASE
+        WHEN subtotal_price_cents is null THEN ol.line_item_price_cents - pre_tax_price_cents_f
+        ELSE round(subtotal_price_cents - pre_tax_price_cents_f)
+    END) AS line_item_order_discount_cents,
     ol.gift_card
 FROM order_lines_rough ol LEFT JOIN percentage_allocation pa ON ol.order_line_id = pa.order_line_id
     AND ol.bundle_properties = pa.bundle_properties
-
-
+LEFT JOIN bundle_discounts bd ON ol.order_line_id = bd.order_line_id
+)
+SELECT order_line_id,
+    order_id,
+    shopify_product_id,
+    emma_product_id,
+    product_variant_id,
+    product_name,
+    product_variant_name,
+    sku,
+    bundle_properties,
+    order_line,
+    bundle_type,
+    product_tag,
+    price_cents,
+    quantity_ordered,
+    fulfillable_quantity,
+    line_item_price_cents,
+    bundle_discount_cents,
+    subtotal_price_cents,
+    line_item_order_discount_cents,
+    pre_tax_price_cents_f AS pre_tax_price_cents,
+    gift_card
+FROM final
