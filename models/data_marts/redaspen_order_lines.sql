@@ -5,7 +5,7 @@
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__order_lines'), ref('int_infotrax__order_lines')]
 )}})
-SELECT du.ORDER_LINE_ID,
+SELECT SELECT du.ORDER_LINE_ID,
 du.ORDER_ID,
 o.ORDER_NUMBER,
 du.SHOPIFY_PRODUCT_ID,
@@ -23,7 +23,9 @@ du.PRICE_CENTS,
 du.QUANTITY_ORDERED,
 du.FULFILLABLE_QUANTITY,
 du.LINE_ITEM_PRICE_CENTS,
-du.TOTAL_DISCOUNT_CENTS,
+du.BUNDLE_DISCOUNT_CENTS,
+du.SUBTOTAL_PRICE_CENTS,
+du.LINE_ITEM_ORDER_DISCOUNT_CENTS,
 du.PRE_TAX_PRICE_CENTS,
 du.GIFT_CARD,
 (CASE 
