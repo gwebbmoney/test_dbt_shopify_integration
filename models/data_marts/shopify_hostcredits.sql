@@ -14,7 +14,7 @@ shopify_pop_ups AS(
             dpo.distributor_status
         FROM {{ ref("shopify_discount_and_promotion_orders") }} dpo JOIN {{ ref("shopify_orders") }} o ON dpo.order_id = o.order_id
         WHERE order_discount_code LIKE '%POP%'
-            AND order_discount_code LIKE '%TS%'
+            OR order_discount_code LIKE '%TS%'
 )
 SELECT order_id,
     hostcredit_amount_cents,
