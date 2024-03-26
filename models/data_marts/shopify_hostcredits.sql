@@ -8,7 +8,7 @@ WITH infotrax_hostcredits AS(
 ),
 shopify_pop_ups AS(
         SELECT dpo.order_id,
-            (dpo.total_discount_amount_cents * -1) AS hostcredit_amount_cents,
+            dpo.total_discount_amount_cents AS hostcredit_amount_cents,
             dpo.created_at,
             o.brand_ambassador_id,
             dpo.distributor_status

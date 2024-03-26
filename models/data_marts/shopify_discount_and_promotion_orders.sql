@@ -43,7 +43,7 @@ orders AS(SELECT order_id,
             total_discount_amount_cents,
             distributor_status,
             created_at
-        FROM {{ ref("redaspen_orders") }}
+        FROM {{ ref("shopify_orders") }}
 )
 SELECT du.*,
     o.distributor_status,
