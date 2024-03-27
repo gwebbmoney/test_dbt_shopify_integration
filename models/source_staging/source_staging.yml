@@ -28,4 +28,5 @@ sources:
       - name: ORDER_TAG
       - name: DISCOUNT_ALLOCATION
       - name: DISCOUNT_APPLICATION
+      - name: FULFILLMENT
 
