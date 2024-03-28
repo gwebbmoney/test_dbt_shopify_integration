@@ -135,6 +135,11 @@ distributor_status_metafield AS(
 FROM {{ source('shopify_raw', 'METAFIELD') }}
 WHERE value IN ('Consumer Order', 'Distributor Order', 'Affiliate Order')
 ),
+pv_qual_field AS(
+    SELECT DISTINCT(owner_id) AS order_id,
+        ROUND(value, 2)*100 AS pv_qualifying_amount
+    WHERE value = 'pv_qualifying_amount'
+),
 customers AS(
     SELECT shopify_customer_id,
         brand_ambassador_id
@@ -164,6 +169,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     oac.order_adjustment_tax_amount*100 AS order_adjustment_tax_amount_cents,
     oi.order_refund*100 AS order_refund_amount_cents,
     (order_invoice_amount_cents - order_refund_amount_cents)::number AS total_order_amount_cents,
+    COALESCE(pvq.pv_qualifying_amount, 0) AS pv_qualifying_amount_cents,
     o.shipping_address_first_name,
     o.shipping_address_last_name,
     o.shipping_address_name,
@@ -218,6 +224,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN distributor_status_metafield dsm ON oi.id = dsm.order_id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
     LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
+    LEFT JOIN pv_qual_field pvq ON oi.id = pvq.order_id
 WHERE o._fivetran_deleted = FALSE
 
 
