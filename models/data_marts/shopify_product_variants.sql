@@ -20,7 +20,7 @@ product_variants AS(
     p.product_type,
     pv.sku
     FROM products p JOIN {{ source('shopify_raw', 'PRODUCT_VARIANT') }} pv ON p.product_id = pv.product_id
-        LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON p.product_id = bv.shopify_bundle_id
+        LEFT JOIN {{ ref("shopify_bundle_variants") }} bv ON p.product_id = bv.shopify_bundle_id
     WHERE bv.shopify_bundle_id IS NULL
         AND bv.emma_id IS NULL
 )
