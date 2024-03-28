@@ -1,5 +1,5 @@
 WITH processed_orders AS(
-    SELECT * FROM {{ ref("redaspen_processed_orders") }}
+    SELECT * FROM {{ ref("shopify_processed_orders") }}
 ),
 order_lines AS(
     SELECT * FROM {{ ref("stg_infotrax__order_lines") }}

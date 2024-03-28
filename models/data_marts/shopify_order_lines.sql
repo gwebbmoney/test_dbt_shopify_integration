@@ -32,4 +32,4 @@ du.GIFT_CARD,
     WHEN du._DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.dbt_shopify_transformations.int_infotrax__order_lines' THEN 'Infotrax'
     ELSE 'Shopify'
 END) AS SOURCE
-FROM data_union du JOIN {{ ref('redaspen_orders') }} o ON du.order_id = o.order_id
+FROM data_union du JOIN {{ ref('shopify_orders') }} o ON du.order_id = o.order_id

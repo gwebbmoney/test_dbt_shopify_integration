@@ -30,11 +30,11 @@ loyalty_box_sku AS(
 ),
 bundles AS(
     SELECT *
-    FROM {{ ref("redaspen_bundle_variants") }}
+    FROM {{ ref("shopify_bundle_variants") }}
 ),
 products AS(
     SELECT *
-    FROM {{ ref("redaspen_product_variants") }}
+    FROM {{ ref("shopify_product_variants") }}
 ),
 loyalty_box_object AS(SELECT ls.id,
     ls.order_id,

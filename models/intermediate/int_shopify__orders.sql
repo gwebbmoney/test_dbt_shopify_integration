@@ -138,7 +138,7 @@ WHERE value IN ('Consumer Order', 'Distributor Order', 'Affiliate Order')
 customers AS(
     SELECT shopify_customer_id,
         brand_ambassador_id
-    FROM {{ref('redaspen_distributors')}}
+    FROM {{ref('shopify_distributors')}}
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,

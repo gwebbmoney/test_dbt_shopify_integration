@@ -4,7 +4,7 @@ WITH transactions AS(
         AND kind = 'sale'
 ),
 processed_orders AS(
-    SELECT * FROM {{ ref('redaspen_processed_orders') }}
+    SELECT * FROM {{ ref('shopify_processed_orders') }}
 )
 SELECT t.order_id,
     t.amount AS hostcredit_amount_cents,
