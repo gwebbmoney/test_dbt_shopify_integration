@@ -12,7 +12,8 @@ refund_cond AS(SELECT ri.infotrax_original_order,
     SUM(ri.discount_amount_cents) AS discount_amount_cents,
     SUM(ri.sales_tax_cents) AS sales_tax_cents,
     SUM(ri.freight_amount_cents) AS freight_amount_cents,
-    SUM(ri.total_invoice_cents) AS total_invoice_cents
+    SUM(ri.total_invoice_cents) AS total_invoice_cents,
+    SUM(ri.pv_qualifying_amount_cents) AS pv_qualifying_amount_cents
 FROM refund_information ri
 WHERE order_status <> 9
 GROUP BY infotrax_original_order, ri.order_source
@@ -23,6 +24,7 @@ orders_comb AS(SELECT si.*,
     IFNULL(rc.sales_tax_cents,0) AS refund_sales_tax_amount,
     IFNULL(rc.freight_amount_cents,0) AS refund_freight_amount,
     IFNULL(rc.total_invoice_cents,0) AS refund_invoice_amount,
+    IFNULL(rc.pv_qualifying_amount_cents, 0) AS refund_pv_qualifying_amount,
     rc.order_source AS refund_order_source
 FROM sales_information si LEFT JOIN refund_cond rc ON si.infotrax_order_number = rc.infotrax_original_order
 ),
@@ -45,6 +47,7 @@ order_integration AS(SELECT infotrax_order_number,
     refund_sales_tax_amount,
     refund_freight_amount,
     refund_invoice_amount,
+    refund_pv_qualifying_amount,
     (total_invoice_cents - refund_invoice_amount) AS total_order_amount_cents,
     ship_to_name,
     ship_to_addr_1,
