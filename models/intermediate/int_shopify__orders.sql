@@ -139,12 +139,12 @@ pv_qual_field AS(
     SELECT DISTINCT(owner_id) AS order_id,
         ROUND(value, 2)*100 AS pv_qualifying_amount
     WHERE value = 'pv_qualifying_amount'
-    FROM (( source('shopify_raw', 'METAFIELD') ))
+    FROM {{ source('shopify_raw', 'METAFIELD') }} 
 ),
 customers AS(
     SELECT shopify_customer_id,
         brand_ambassador_id
-    FROM {{ref('shopify_distributors')}}
+    FROM {{ ref('shopify_distributors') }}
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -227,9 +227,3 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
     LEFT JOIN pv_qual_field pvq ON oi.id = pvq.order_id
 WHERE o._fivetran_deleted = FALSE
-
-
-
-
-
-
