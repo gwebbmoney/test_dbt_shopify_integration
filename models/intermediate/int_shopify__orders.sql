@@ -138,8 +138,8 @@ WHERE value IN ('Consumer Order', 'Distributor Order', 'Affiliate Order')
 pv_qual_field AS(
     SELECT DISTINCT(owner_id) AS order_id,
         ROUND(value, 2)*100 AS pv_qualifying_amount
-    WHERE value = 'pv_qualifying_amount'
     FROM {{ source('shopify_raw', 'METAFIELD') }} 
+    WHERE value = 'pv_qualifying_amount'
 ),
 customers AS(
     SELECT shopify_customer_id,
