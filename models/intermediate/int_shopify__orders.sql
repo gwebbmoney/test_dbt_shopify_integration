@@ -139,12 +139,6 @@ customers AS(
     SELECT shopify_customer_id,
         brand_ambassador_id
     FROM {{ref('redaspen_distributors')}}
-),
-processed_fulfillment AS(
-        SELECT order_id,
-            DATEADD('hour', -6, created_at) AS processed_at
-        FROM {{ source('shopify_raw', 'FULFILLMENT') }}
-        WHERE status = 'success'
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -155,7 +149,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     od.total_discount_amount*100 AS total_discount_amount_cents,
     oi.order_invoice*100 AS order_invoice_amount_cents,
     DATEADD(hour, -7, o.created_at)::timestamp_ntz AS created_at,
-    pf.processed_at::timestamp_ntz AS processed_at,
+    DATEADD(hour, -7, o.processed_at)::timestamp_ntz AS processed_at,
     DATEADD(hour, -7, o.cancelled_at)::timestamp_ntz AS cancelled_at,
     DATEADD(hour, -7, o.updated_at)::timestamp_ntz AS updated_at,
     DATE_TRUNC('month', created_at) AS bonus_period,
@@ -224,7 +218,6 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN distributor_status_metafield dsm ON oi.id = dsm.order_id
     LEFT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oi.id = o.id
     LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
-    LEFT JOIN processed_fulfillment pf ON oi.id = pf.order_id
 WHERE o._fivetran_deleted = FALSE
 
 
