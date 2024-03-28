@@ -5,7 +5,7 @@
 WITH infotrax_array AS(SELECT ol.bundle_properties[0]['bundle_order_line_id'] AS bundle_order_line_id,
     ol.order_id,
     ARRAY_AGG(sku) AS product_sku_array
-FROM {{ ref("redaspen_order_lines") }} ol
+FROM {{ ref("shopify_order_lines") }} ol
 WHERE bundle_properties IS NOT NULL
     AND source = 'Infotrax'
 GROUP BY bundle_order_line_id, ol.order_id
@@ -13,7 +13,7 @@ GROUP BY bundle_order_line_id, ol.order_id
 loyalty_box_array AS(SELECT ARRAY_AGG(ol.sku) AS product_sku_array,
                         ol.order_id,
                         ol.bundle_properties 
-            FROM {{ ref('redaspen_order_lines') }} ol
+            FROM {{ ref('shopify_order_lines') }} ol
             WHERE ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
             GROUP BY ol.bundle_properties, ol.order_id
 ),
@@ -28,7 +28,7 @@ bundle_union AS(
         ol.bundle_properties[0]['total_amount'] AS pre_tax_price_cents,
         ia.product_sku_array AS product_sku_array,
         ol.source
-    FROM {{ ref("redaspen_order_lines") }} ol LEFT JOIN infotrax_array ia ON ol.bundle_properties[0]['bundle_order_line_id'] = ia.bundle_order_line_id
+    FROM {{ ref("shopify_order_lines") }} ol LEFT JOIN infotrax_array ia ON ol.bundle_properties[0]['bundle_order_line_id'] = ia.bundle_order_line_id
     WHERE source = 'Infotrax'
 UNION
     --Infotrax Bundles with no Components
@@ -41,7 +41,7 @@ UNION
         pre_tax_price_cents,
         NULL AS product_sku_array,
         source
-    FROM {{ ref("redaspen_order_lines") }}
+    FROM {{ ref("shopify_order_lines") }}
     WHERE skuable_type = 'Bundle'
         AND bundle_properties IS NULL
         OR ARRAY_SIZE(bundle_properties) = 0
@@ -63,7 +63,7 @@ FROM (SELECT DISTINCT(ol.bundle_properties[2]['value']) AS distinction,
             SPLIT(ol.bundle_properties[4]['value'], ',') AS product_sku_array,
             ol.bundle_properties[3]['value']::number AS quantity_ordered,
             source
-    FROM {{ ref("redaspen_order_lines") }} ol 
+    FROM {{ ref("shopify_order_lines") }} ol 
     WHERE source = 'Shopify'
         AND ARRAY_SIZE(ol.bundle_properties) > 0
         AND ol.bundle_properties[0]['loyalty_box_order_id'] IS NULL
@@ -79,7 +79,7 @@ SELECT ol.bundle_properties[0]['loyalty_box_order_line_id'] AS order_line_id,
     ol.bundle_properties[0]['loyalty_box_total']*100 AS pre_tax_price_cents,
     lba.product_sku_array,
     ol.source
-FROM {{ ref("redaspen_order_lines") }} ol RIGHT JOIN loyalty_box_array lba ON ol.order_id = lba.order_id
+FROM {{ ref("shopify_order_lines") }} ol RIGHT JOIN loyalty_box_array lba ON ol.order_id = lba.order_id
 WHERE ol.bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
 )
 SELECT bu.bundle_order_line_id,
@@ -95,6 +95,6 @@ SELECT bu.bundle_order_line_id,
     o.created_at
 FROM bundle_union bu /*LEFT JOIN {{ ref("redaspen_bundle_variants") }} bv ON bu.bundle_sku = bv.sku
     OR bu.bundle_name = bv.shopify_bundle_title */ --We need a better way to categorize loyalty boxes. We have overlapping skus, which is the only item that Infotrax order lines connects on for product id's.
-LEFT JOIN {{ ref("redaspen_orders") }} o ON bu.order_id = o.order_id
+LEFT JOIN {{ ref("shopify_orders") }} o ON bu.order_id = o.order_id
 --Cast as number once fixes are made
 
