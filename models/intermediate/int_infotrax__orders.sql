@@ -80,8 +80,9 @@ SELECT oi.infotrax_order_number AS order_id,
         ELSE 'fulfilled'
      END) AS fulfillment_status,
     (CASE
-        WHEN order_source = 903 THEN 'Subscription_Order'
-        WHEN order_source = 905 THEN 'Enrollment_Order'
+        WHEN order_source = 903 THEN ARRAY_CONSTRUCT('Subscription_Order')
+        WHEN order_source = 905 THEN ARRAY_CONSTRUCT('Enrollment_Order')
+        ELSE []
     END) AS order_tag_type,
     (CASE
         WHEN order_source = 915 THEN TRUE
