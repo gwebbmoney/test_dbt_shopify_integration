@@ -106,7 +106,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     GROUP BY o.id, oa.kind
 ),
-order_tag_cond AS(
+order_tag AS(
     SELECT DISTINCT(order_id) AS order_id,
     (CASE
         WHEN value = 'Subscription First Order' THEN 'Subscription_First_Order'
@@ -115,6 +115,12 @@ order_tag_cond AS(
     END) AS order_tag_type
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
 WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
+),
+order_tag_cond AS(
+    SELECT order_id,
+        ARRAY_AGG(order_tag_type) AS order_tag_type
+    FROM order_tag
+    GROUP BY order_id
 ),
 redeemed_pop_up AS(
     SELECT DISTINCT(order_id) AS order_id,
@@ -200,7 +206,7 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.referring_site,
     o.app_id,
     o.buyer_accepts_marketing,
-    otc.order_tag_type,
+    COALESCE(otc.order_tag_type, []) AS order_tag_type,
     rpu.redeemed_pop_up_reward,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"SponsorID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS sponsor_id,
     REGEXP_SUBSTR(o.note_attributes, '"name"\s*:\s*"PartyID"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1) AS partyid,
