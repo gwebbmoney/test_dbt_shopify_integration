@@ -86,7 +86,7 @@ tax_lines_cond AS(SELECT DISTINCT(o.id),
                     LEFT JOIN {{ source('shopify_raw', 'TAX_LINE') }} tl ON ol.id = tl.order_line_id
                 GROUP BY o.id
 ),
-order_adjustment_cond AS(SELECT DISTINCT(o.id),
+order_adjustment_shipping AS(SELECT DISTINCT(o.id),
                         (CASE
                             WHEN SUM(amount) IS NULL THEN 0
                             WHEN kind = 'shipping_refund' THEN (SUM(amount)*-1)
@@ -94,7 +94,12 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         (CASE
                             WHEN SUM(tax_amount) IS NULL THEN 0
                             WHEN kind = 'shipping_refund' THEN SUM(tax_amount) 
-                        END) AS shipping_tax_refund,
+                        END) AS shipping_tax_refund
+                        FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
+                        WHERE kind = 'shipping_refund'
+                        GROUP BY o.id, oa.kind
+),
+order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         (CASE
                             WHEN SUM(amount) IS NULL THEN 0
                             WHEN kind <> 'shipping_refund' THEN SUM(amount)
@@ -104,6 +109,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                             ELSE SUM(tax_amount)
                         END) AS order_adjustment_tax_amount
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
+                    WHERE kind <> 'shipping_refund'
                     GROUP BY o.id, oa.kind
 ),
 order_tag AS(
@@ -170,8 +176,8 @@ SELECT DISTINCT(oi.id) AS order_id,
     o.fulfillment_status,
     ABS(orf.subtotal_refund) AS subtotal_refund_cents,
     ABS(orf.total_tax_refund) AS sales_tax_refund_cents,
-    ABS(oac.shipping_refund)*100 AS shipping_refund_cents,
-    ABS(oac.shipping_tax_refund)*100 AS shipping_tax_refund_cents,
+    ABS(oas.shipping_refund)*100 AS shipping_refund_cents,
+    ABS(oas.shipping_tax_refund)*100 AS shipping_tax_refund_cents,
     oac.order_adjustment_amount*100 AS order_adjustment_amount_cents,
     oac.order_adjustment_tax_amount*100 AS order_adjustment_tax_amount_cents,
     oi.order_refund*100 AS order_refund_amount_cents,
@@ -225,6 +231,7 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN order_discount od ON oi.id = od.id
     LEFT JOIN shipping_amount sa ON oi.id = sa.id
     LEFT JOIN shipping_tax_amount sta ON oi.id = sta.id
+    LEFT JOIN order_adjustment_shipping oas ON oi.id = oas.id
     LEFT JOIN order_adjustment_cond oac ON oi.id = oac.id
     LEFT JOIN order_tag_cond otc ON oi.id = otc.order_id
     LEFT JOIN redeemed_pop_up rpu ON oi.id = rpu.order_id
