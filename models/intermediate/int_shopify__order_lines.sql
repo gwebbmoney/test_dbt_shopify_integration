@@ -38,7 +38,7 @@ products AS(
 ),
 loyalty_box_object AS(SELECT ls.id,
     ls.order_id,
-    ARRAY_CONSTRUCT(OBJECT_CONSTRUCT('loyalty_box_order_id', ol.order_id::number,
+    ARRAY_AGG(OBJECT_CONSTRUCT('loyalty_box_order_id', ol.order_id::number,
     'loyalty_box_order_line_id', ol.id::number,
     'loyalty_box_sku',ol.sku::string,
     'loyalty_box_title', ol.title::string,
@@ -47,6 +47,7 @@ loyalty_box_object AS(SELECT ls.id,
     'loyalty_box_subtotal', (ol.price*ol.quantity)::number,
     'loyalty_box_total', ol.pre_tax_price::number)) AS loyalty_box_properties
     FROM loyalty_box_sku ls JOIN order_lines ol ON ls.order_id = ol.order_id AND ls.loyalty_box_sku = ol.sku
+    GROUP BY ls.id, ls.order_id
 ),
 norm_order_lines AS(SELECT id AS order_line_id,
     order_id,
@@ -111,8 +112,14 @@ percentage_allocation AS(SELECT ol.order_line_id,
                             ol.line_item_price_cents,
                             ol.bundle_properties,
                             DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) AS allocated_percentage, --Used to calculate product price on the line item level for loyalty box purchases
-                            (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_subtotal']) AS subtotal_price,
-                            (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_total']) AS pre_tax_price
+                            (CASE
+                            WHEN ol.bundle_properties[1]['loyalty_box_subtotal'] IS NULL THEN (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_subtotal'])
+                            ELSE (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * (ol.bundle_properties[0]['loyalty_box_subtotal'] + ol.bundle_properties[1]['loyalty_box_subtotal']))
+                            END)AS subtotal_price,
+                            (CASE
+                            WHEN ol.bundle_properties[1]['loyalty_box_total'] IS NULL THEN (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * ol.bundle_properties[0]['loyalty_box_total'])
+                            ELSE (DIV0(ol.line_item_price_cents, lbj.loyalty_box_product_price) * (ol.bundle_properties[0]['loyalty_box_total'] + ol.bundle_properties[1]['loyalty_box_total']))
+                            END)AS pre_tax_price
                     FROM loyalty_box_join lbj JOIN order_lines_rough ol ON lbj.order_id = ol.order_id 
                         AND lbj.bundle_properties = ol.bundle_properties
 ),
