@@ -22,6 +22,7 @@ with
             b.product_id as bundle_id,
             b.emma_product_id as emma_bundle_id,
             b.product_title as bundle_title,
+            b.product_type as bundle_category_type,
             btt.value as bundle_type,
             bv.sku
         from {{ source("shopify_raw", "PRODUCT_VARIANT") }} bv
@@ -35,6 +36,7 @@ select
     bv.bundle_title as shopify_bundle_title,
     bv.bundle_variant_id as shopify_bundle_variant_id,
     bv.bundle_variant_title as shopify_bundle_variant_title,
+    bv.bundle_category_type,
     coalesce(b.sku, bv.sku) as sku,
     coalesce(bundle_type, skuable_type) as bundle_type,
     (
