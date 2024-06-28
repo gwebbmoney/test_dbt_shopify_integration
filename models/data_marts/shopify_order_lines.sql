@@ -28,6 +28,7 @@ du.SUBTOTAL_PRICE_CENTS,
 du.LINE_ITEM_ORDER_DISCOUNT_CENTS,
 du.PRE_TAX_PRICE_CENTS,
 du.GIFT_CARD,
+o.DISTRIBUTOR_STATUS,
 (CASE 
     WHEN du._DBT_SOURCE_RELATION = 'FIVETRAN_SHOPIFY_RAW_DATA.dbt_shopify_transformations.int_infotrax__order_lines' THEN 'Infotrax'
     ELSE 'Shopify'
