@@ -45,6 +45,7 @@ SELECT ol.id,
     pbb.sku_id,
     ol.promo_id,
     ol.kit_line,
+    rio.distributor_status,
     ol._FIVETRAN_DELETED
 FROM raw_order_lines ol LEFT JOIN raw_infotrax_orders rio ON ol.order_number = rio.infotrax_order_number
     LEFT JOIN product_bundle_base pbb ON pbb.sku = ol.item_code
