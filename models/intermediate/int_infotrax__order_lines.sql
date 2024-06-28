@@ -83,7 +83,8 @@ SELECT pol.id AS order_line_id,
         ELSE line_item_price_cents
     END) AS pre_tax_price_cents,
     (subtotal_price_cents - pre_tax_price_cents) AS line_item_order_discount_cents,
-    pol.skuable_type
+    pol.skuable_type,
+    pol.distributor_status
 FROM product_order_line pol
 ORDER BY pol.infotrax_order_number, pol.order_line
 
