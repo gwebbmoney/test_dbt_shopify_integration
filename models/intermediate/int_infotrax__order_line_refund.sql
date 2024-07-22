@@ -1,9 +1,11 @@
+-- Creates view that houses infotrax order lines and transforms this data in order to combine to Shopify
 with
     order_lines as (
         select ol.*, sk.skuable_type
         from {{ ref("stg_infotrax__order_lines") }} ol
         left join {{ source("redaspen", "SKUS") }} sk on ol.infotrax_sku = sk.name
         where infotrax_sku <> 'Discount' and infotrax_sku <> 'HOSTCREDIT'
+-- Grabs order lines that do not contain 'Discount' or 'HOSTCREDIT' rows
     ),
     order_lines_cond as (
         select ol.*, o.infotrax_original_order
@@ -12,9 +14,12 @@ with
             {{ ref("stg_infotrax__orders") }} o
             on ol.infotrax_order_number = o.infotrax_order_number
         where o.order_source = 904
+-- Grabs all order lines that were not within a refunded order
     ),
     bundle_order_lines as (
         select * from {{ ref("stg_infotrax__bundle_refund_order_lines") }}
+-- Grabs data from bundle order lines
+-- Used to help match the Shopify format on how they calculate/display bundle information
     ),
     bundle_lines as (
         select
@@ -32,6 +37,8 @@ with
             component_status
         from bundle_order_lines
         where kit_line = 0
+-- Grab all bundles within the bundle order lines table
+-- Component status = M and P means is an Infotrax field. Basically states if the product shown was a bundle or not.
     ),
     product_bundle_array as (
         select distinct(bol.order_line_id),
@@ -67,6 +74,8 @@ with
             and bol.component_status not in ('M', 'P')
             and bol.order_line > bl.order_line
         order by bol.order_line_id
+-- Grabs all products that were within a bundle
+-- Creates array object to house all of the bundle information
     ),
     bundle_properties as (
         select bol.*, pba.bundle_properties
@@ -76,6 +85,7 @@ with
             on pba.order_line_id = bol.order_line_id
             and bol.infotrax_order_number = pba.infotrax_order_number
             and bol.order_line = pba.product_order_line
+-- Combines product bundle array with bundle order lines
     ),
     product_order_line as (
         select
@@ -89,6 +99,7 @@ with
             on olc.id = bp.order_line_id
             and olc.infotrax_order_number = bp.infotrax_order_number
         where olc.component_status not in ('M', 'P')
+-- Grabs the product order line of a product
     )
 select
     id as order_line_id,
@@ -117,3 +128,4 @@ select
     ) as pre_tax_refund_cents
 from product_order_line
 order by infotrax_order_number, order_line
+-- Organizes view into it's final format
