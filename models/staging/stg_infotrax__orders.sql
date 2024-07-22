@@ -1,3 +1,6 @@
+-- Creates order table from Infotrax
+-- Contains all order data that is ingested from Infotrax
+-- Emulates current structure seen in Snowflake (REDASPEN.ORDERS.ORDERS)
 SELECT 
     order_number as infotrax_order_number,
     discount_amount * 100 as discount_amount_cents,
