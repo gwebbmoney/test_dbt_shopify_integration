@@ -1,10 +1,15 @@
+-- Creates view that grabs all infotrax orders
 WITH sales_information AS(SELECT *
                     FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE <> 904
+-- Grabs all infotrax orders
+-- These orders do not include refunded orders
 ),
 refund_information AS(SELECT *
                     FROM {{ ref('stg_infotrax__orders') }}
                     WHERE ORDER_SOURCE = 904
+-- Grabs all infotrax refunded orders
+-- These orders only contain refunded orders
 ),
 refund_cond AS(SELECT ri.infotrax_original_order,
     ri.order_source,
@@ -17,6 +22,7 @@ refund_cond AS(SELECT ri.infotrax_original_order,
 FROM refund_information ri
 WHERE order_status <> 9
 GROUP BY infotrax_original_order, ri.order_source
+-- Creates fields that contain order information
 ),
 orders_comb AS(SELECT si.*,
     IFNULL(rc.retail_amount_cents,0) AS refund_subtotal_amount,
@@ -27,6 +33,8 @@ orders_comb AS(SELECT si.*,
     IFNULL(rc.pv_qualifying_amount_cents, 0) AS refund_pv_qualifying_amount,
     rc.order_source AS refund_order_source
 FROM sales_information si LEFT JOIN refund_cond rc ON si.infotrax_order_number = rc.infotrax_original_order
+-- Creates fields that contains refunded order information and combines them with order information
+-- Used to match how Shopify calculates orders
 ),
 order_integration AS(SELECT infotrax_order_number,
     retail_amount_cents,
@@ -58,6 +66,7 @@ order_integration AS(SELECT infotrax_order_number,
     distributor_id,
     distributor_status
 FROM orders_comb oc
+-- Combines orders and refunded orders used to match to Shopify
 )
 SELECT oi.infotrax_order_number AS order_id,
     retail_amount_cents AS subtotal_amount_cents,
@@ -74,20 +83,24 @@ SELECT oi.infotrax_order_number AS order_id,
         WHEN order_source = 904 AND total_order_amount_cents > 0 THEN 'partially_refunded'
         ELSE 'paid'
      END) AS financial_status,
+     -- Shopify field that states the status of an order
     (CASE
         WHEN oi.order_status = 1 THEN 'unfulfilled'
         WHEN oi.order_status = 9 THEN 'cancelled'
         ELSE 'fulfilled'
      END) AS fulfillment_status,
+     -- Shopify field that states the shipping status of an order
     (CASE
         WHEN order_source = 903 THEN ARRAY_CONSTRUCT('Subscription_Order')
         WHEN order_source = 905 THEN ARRAY_CONSTRUCT('Enrollment_Order')
         ELSE []
     END) AS order_tag_type,
+    -- Shopify field that houses the subscription type of the order or if the order was an enrollment kit
     (CASE
         WHEN order_source = 915 THEN TRUE
         ELSE FALSE
     END) AS redeemed_pop_up_reward,
+    -- Boolean that states if a pop up reward was used
     refund_subtotal_amount AS subtotal_refund_cents,
     refund_discount_amount AS discount_refund_cents,
     refund_sales_tax_amount AS sales_tax_refund_cents,
@@ -104,4 +117,4 @@ SELECT oi.infotrax_order_number AS order_id,
     distributor_id AS brand_ambassador_id,
     distributor_status
 FROM order_integration oi
-
+-- Organizes view into it's final format

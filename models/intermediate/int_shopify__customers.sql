@@ -1,3 +1,4 @@
+-- Creates view of Shopify customer information
 WITH metadata AS(SELECT owner_id,
             key,
             value,
@@ -5,6 +6,7 @@ WITH metadata AS(SELECT owner_id,
         FROM {{ source('shopify_raw', 'METAFIELD') }}
         WHERE OWNER_RESOURCE IN('customer', 'CUSTOMER')
             AND key IN('InfoTraxID', 'MentorID', 'distributor_status')
+-- Grabs all customer information from the SHOPIFY.METAFIELD table
 ),
 customer_data AS(SELECT DISTINCT(m.owner_id) AS customer_id,
     c.email,
@@ -20,12 +22,14 @@ customer_data AS(SELECT DISTINCT(m.owner_id) AS customer_id,
 FROM metadata m LEFT JOIN {{ source('shopify_raw', 'CUSTOMER') }} c ON c.id = m.owner_id
 GROUP BY m.owner_id, c.email
 ORDER BY m.owner_id
+-- Finds all distributor ids, sponsor ids, and distributor statuses for a customer/distributor
 ),
 customer_tag AS(SELECT customer_id,
                     MAX(SELECT REGEXP_SUBSTR(value, 'partner_site:\s*([^"]*)', 1, 1, 'i', 1)) AS partner_site,
                     MAX(SELECT REGEXP_SUBSTR(value, 'site:\s*([^"]*)', 1, 1, 'i', 1)) AS site
                 FROM {{source('shopify_raw', 'CUSTOMER_TAG')}}
                 GROUP BY customer_id
+-- Grabs all partner sites and sites attached to a customer
 ),
 customer_address AS(SELECT customer_id,
                     address_1,
@@ -38,6 +42,7 @@ customer_address AS(SELECT customer_id,
                     longitude
                 FROM {{ source('shopify_raw', 'CUSTOMER_ADDRESS') }}
                 WHERE is_default = TRUE
+-- Grabs customer address information
 )
 SELECT c.id AS customer_id,
     c.email,
@@ -69,3 +74,4 @@ FROM {{ source('shopify_raw', 'CUSTOMER') }} c LEFT JOIN customer_data cd ON c.i
     LEFT JOIN customer_address ca ON c.id = ca.customer_id
     LEFT JOIN customer_tag ct ON c.id = ct.customer_id
 WHERE c._fivetran_deleted = FALSE
+-- Organizes Shopify customer view into it's final format
