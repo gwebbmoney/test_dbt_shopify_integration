@@ -2,6 +2,7 @@
 
 {{ config(schema = 'transaction_metrics')}}
 
+-- Creates Transient Table within Snowflake that houses both Infotrax and Shopify refunds
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('stg_shopify__refunds'), ref('stg_infotrax__refunds')]
 )}}
@@ -19,3 +20,4 @@ SELECT ORDER_ID,
         ELSE 'Shopify'
     END) AS SOURCE
 FROM data_union
+-- Organizes table for final format

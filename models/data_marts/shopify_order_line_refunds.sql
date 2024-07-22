@@ -2,6 +2,7 @@
 
 {{ config(schema = 'orders')}}
 
+-- Creates a Transient Table that houses both Infotrax and Shopify order line refunds
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref("int_shopify__order_line_refund"), ref("int_infotrax__order_line_refund")]
 )}}
@@ -23,6 +24,6 @@ SELECT ORDER_ID,
         ELSE 'Shopify'
     END) AS source
 FROM data_union 
-
+-- Organizes table into it's final format
 
 

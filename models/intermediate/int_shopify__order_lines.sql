@@ -1,5 +1,8 @@
+-- Creates view that properly transforms Shopify order line data
+-- NOTE: Loyalty box orders are subscription orders for Red Aspen
 WITH order_lines AS(
     SELECT * FROM {{ source('shopify_raw', 'ORDER_LINE') }}
+-- Grabs Shopify order line data
 ),
 loyalty_box_discount AS(
     SELECT STRTOK_TO_ARRAY(dap.title, '-') AS loyalty_box_array,
@@ -8,6 +11,8 @@ loyalty_box_discount AS(
         ol.sku
     FROM {{ source('shopify_raw', 'DISCOUNT_ALLOCATION') }} dal JOIN order_lines ol ON dal.order_line_id = ol.id
         JOIN {{ source('shopify_raw', 'DISCOUNT_APPLICATION') }} dap ON dap.order_id = ol.order_id AND dap.index = dal.discount_application_index
+-- Grabs discounts for loyalty box orders
+-- Used to find which orders were loyalty box orders
 ),
 bundle_discounts AS(
     SELECT dap.order_id,
@@ -20,6 +25,7 @@ bundle_discounts AS(
         AND dap.target_type = 'line_item'
         AND dap.allocation_method = 'across'
     GROUP BY dap.order_id, dal.order_line_id, dal.discount_application_index
+-- Grabs the bundle discount for the order line
 ),
 loyalty_box_sku AS(
     SELECT LTRIM(loyalty_box_array[1]::string) AS loyalty_box_sku,
@@ -27,14 +33,17 @@ loyalty_box_sku AS(
         id,
         sku
     FROM loyalty_box_discount
+-- Grabs the loyalty box sku
 ),
 bundles AS(
     SELECT *
     FROM {{ ref("shopify_bundle_variants") }}
+-- Grabs all shopify bundles
 ),
 products AS(
     SELECT *
     FROM {{ ref("shopify_product_variants") }}
+-- Grabs all shopify products
 ),
 loyalty_box_object AS(SELECT ls.id,
     ls.order_id,
@@ -48,6 +57,7 @@ loyalty_box_object AS(SELECT ls.id,
     'loyalty_box_total', ol.pre_tax_price::number)) AS loyalty_box_properties
     FROM loyalty_box_sku ls JOIN order_lines ol ON ls.order_id = ol.order_id AND ls.loyalty_box_sku = ol.sku
     GROUP BY ls.id, ls.order_id
+-- Creates an array object that houses all of the loyalty box information
 ),
 norm_order_lines AS(SELECT id AS order_line_id,
     order_id,
@@ -78,6 +88,8 @@ norm_order_lines AS(SELECT id AS order_line_id,
 FROM order_lines ol LEFT JOIN products p ON ol.sku = p.sku AND ol.variant_id = p.shopify_product_variant_id 
     LEFT JOIN bundles b ON ol.sku = b.sku AND ol.variant_id = b.shopify_bundle_variant_id
 WHERE b.bundle_type IS NULL OR b.bundle_type IN ('Bundle_Fixed', 'Bundle', 'Bundle_Custom')
+-- Creates a more normalized view of the order lines table
+-- Combines all of the changes for loyalty boxes and bundles
 ),
 order_lines_rough AS(SELECT nol.order_line_id,
     nol.order_id,
@@ -99,6 +111,8 @@ order_lines_rough AS(SELECT nol.order_line_id,
     nol.pre_tax_price_cents,
     nol.gift_card
 FROM norm_order_lines nol LEFT JOIN loyalty_box_object lbo ON nol.order_line_id = lbo.id AND nol.order_id = lbo.order_id
+-- Creates a preliminary rough draft of the order lines table
+-- Used to help reference with the bundle properties field
 ),
 loyalty_box_join AS(SELECT order_id,
                         bundle_properties,
@@ -106,6 +120,7 @@ loyalty_box_join AS(SELECT order_id,
                     FROM order_lines_rough
                     WHERE bundle_properties[0]['loyalty_box_order_id'] IS NOT NULL
                     GROUP BY order_id, bundle_properties
+-- Sums the loyalty box price
 ),
 percentage_allocation AS(SELECT ol.order_line_id,
                             ol.order_id,
@@ -122,6 +137,7 @@ percentage_allocation AS(SELECT ol.order_line_id,
                             END)AS pre_tax_price
                     FROM loyalty_box_join lbj JOIN order_lines_rough ol ON lbj.order_id = ol.order_id 
                         AND lbj.bundle_properties = ol.bundle_properties
+-- Allocates the product price percentage if a product was purchased within a bundle
 ),
 final AS(SELECT ol.order_line_id,
     ol.order_id,
@@ -159,6 +175,7 @@ final AS(SELECT ol.order_line_id,
 FROM order_lines_rough ol LEFT JOIN percentage_allocation pa ON ol.order_line_id = pa.order_line_id
     AND ol.bundle_properties = pa.bundle_properties
 LEFT JOIN bundle_discounts bd ON ol.order_line_id = bd.order_line_id
+-- Combines all calculations into one CTE
 )
 SELECT order_line_id,
     order_id,
@@ -182,3 +199,4 @@ SELECT order_line_id,
     pre_tax_price_cents_f AS pre_tax_price_cents,
     gift_card
 FROM final
+-- Organizes final order lines table into it's final format

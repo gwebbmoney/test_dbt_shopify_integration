@@ -2,6 +2,7 @@
 
 {{ config(schema="bundles") }}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 with
     bundle_tag as (select * from {{ source("shopify_raw", "PRODUCT_TAG") }}),
     bundle_type_tag as (

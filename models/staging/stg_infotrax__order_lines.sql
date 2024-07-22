@@ -1,3 +1,6 @@
+-- Creates order lines table from Infotrax
+-- Contains all order line data that is ingested from Infotrax
+-- NOTE: EMMA is our in-house application that houses various company data. For this purpose, we grab product information from this resource and attach it to the order lines table
 WITH raw_order_lines AS(
     SELECT * FROM {{ source('raw_infotrax', 'ORDERLINES') }}
 ),
@@ -5,6 +8,7 @@ raw_infotrax_orders AS(
     SELECT * 
     FROM {{ ref("stg_infotrax__orders") }}
     WHERE bonus_period >= '2020-01-01'
+-- Only takes order data from 2020 forward. This is because our data wasn't normalized prior to this period
 ),
 product_bundle_base AS(
     SELECT s.name AS sku,
@@ -14,6 +18,7 @@ product_bundle_base AS(
     FROM {{ source("redaspen", 'PRODUCTS') }} p
         LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON p.id = s.skuable_id
     WHERE s.skuable_type = 'Product'
+-- Combines EMMA product information
     UNION
     SELECT s.name as sku,
         b.name,
@@ -22,6 +27,7 @@ product_bundle_base AS(
     FROM {{ source("redaspen", 'BUNDLES') }} b
         LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
     WHERE s.skuable_type = 'Bundle'
+-- Combines EMMA bundle information
 )
 SELECT ol.id,
     ol.sales_price * 100 as sales_price_cents,
@@ -50,3 +56,4 @@ SELECT ol.id,
 FROM raw_order_lines ol LEFT JOIN raw_infotrax_orders rio ON ol.order_number = rio.infotrax_order_number
     LEFT JOIN product_bundle_base pbb ON pbb.sku = ol.item_code
 WHERE ol._FIVETRAN_DELETED = FALSE
+-- Combines all order line information into it's final format

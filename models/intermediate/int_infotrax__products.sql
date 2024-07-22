@@ -1,3 +1,5 @@
+-- Creates view of all products and bundles shown within EMMA
+-- NOTE: EMMA is our in-house application that houses various company data. For this purpose, we grab product information from this resource and attach it to the order lines table
 SELECT p.id AS product_id,
     s.name AS sku,
     p.name AS product_title,
@@ -28,6 +30,7 @@ FROM {{ source("normalized_snowflake", 'PRODUCTS') }} p LEFT JOIN {{ source("red
     LEFT JOIN {{ source("redaspen", 'CATEGORIES') }} c ON p.category_id = c.id
     LEFT JOIN {{ source("redaspen", 'SUB_CATEGORIES') }} sc ON p.sub_category_id = sc.id
 WHERE s.skuable_type = 'Product'
+-- Grabs all products within EMMA
 UNION
 SELECT b.id AS bundle_id,
     s.name AS sku,
@@ -57,6 +60,7 @@ SELECT b.id AS bundle_id,
     s.skuable_type
 FROM {{ source("redaspen", 'BUNDLES') }} b LEFT JOIN {{ source("redaspen", 'SKUS') }} s ON b.id = s.skuable_id
 WHERE s.skuable_type = 'Bundle'
+-- Grabs all bundles within EMMA
 
 
 

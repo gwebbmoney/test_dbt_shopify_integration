@@ -2,11 +2,14 @@
 
 {{ config(schema = 'distributors')}}
 
+-- Creates a Transient Table within Snowflake that houses both Infotrax and Shopify customer/distributor information
 WITH shopify_customers AS(
     SELECT * FROM {{ ref("int_shopify__customers") }}
+-- Grabs all shopify customers/distributors
 ),
 redaspen_distributors AS(
     SELECT * FROM {{ ref("int_redaspen__distributors") }}
+-- Grabs all Infotrax customers/distributors
 )
 SELECT sc.customer_id AS shopify_customer_id,
     CAST(sc.brand_ambassador_id AS NUMBER) AS brand_ambassador_id,
@@ -37,3 +40,5 @@ SELECT sc.customer_id AS shopify_customer_id,
     sc.updated_at,
     sc.metafield
 FROM shopify_customers sc LEFT JOIN redaspen_distributors rd ON sc.brand_ambassador_id = rd.distributor_id
+-- Combines both Infotrax and Shopify into one table
+-- Organizes table into it's final format

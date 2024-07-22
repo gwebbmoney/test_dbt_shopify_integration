@@ -2,6 +2,7 @@
 
 {{ config(schema = 'orders') }}
 
+-- Creates a Transient Table within Snowflake that houses both Infotrax and Shopify orders
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__orders'), ref('int_infotrax__orders')]
 )}}),
@@ -84,11 +85,15 @@ END) AS SOURCE,
 _FIVETRAN_DELETED,
 _FIVETRAN_SYNCED
 FROM data_union
+-- Organizes table into it's final format
 ),
 final AS(SELECT *
 FROM column_order
 WHERE NOT (source = 'Infotrax' AND order_id::string IN(SELECT LTRIM(infotrax_order_number_reference) FROM column_order WHERE source = 'Shopify'))
+-- Clause that makes sure Infotrax and Shopify data do not overlap
+-- NOTE: This clause was necessary when both connectors were ongoing. This was because if an order was placed on Shopify, it also was linked over to Infotrax for commissions purposes
 )
 SELECT *
 FROM final
 WHERE test = FALSE OR test IS NULL
+-- Clause that makes it so that test orders are not included

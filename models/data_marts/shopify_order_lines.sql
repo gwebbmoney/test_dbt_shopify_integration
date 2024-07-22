@@ -2,6 +2,7 @@
 
 {{ config(schema = 'orders')}}
 
+-- Creates a Transient Table that houses both Infotrax and Shopify order lines
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('int_shopify__order_lines'), ref('int_infotrax__order_lines')]
 )}})
@@ -34,3 +35,4 @@ o.DISTRIBUTOR_STATUS,
     ELSE 'Shopify'
 END) AS SOURCE
 FROM data_union du JOIN {{ ref('shopify_orders') }} o ON du.order_id = o.order_id
+-- Organizes table into it's final format
