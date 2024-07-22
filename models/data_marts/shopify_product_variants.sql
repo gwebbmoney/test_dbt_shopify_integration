@@ -2,14 +2,18 @@
 
 {{ config(schema = 'products')}}
 
+-- Creates Transient Table within Snowflake that houses both Shopify and EMMA products
 WITH products AS(
     SELECT * FROM {{ ref("int_shopify__products") }}
+-- Grabs products from Shopify
 ),
 product_tag AS(
     SELECT product_id,  
         value AS product_tag
     FROM {{ source('shopify_raw', 'PRODUCT_TAG') }}
     WHERE value = 'bogos-gift' 
+-- Grabs product tag where value = 'bogos-gift'
+-- This means 'Buy One Get One' product
 ),
 product_variants AS(
     SELECT pv.id AS product_variant_id,
@@ -23,6 +27,7 @@ product_variants AS(
         LEFT JOIN {{ ref("shopify_bundle_variants") }} bv ON p.product_id = bv.shopify_bundle_id
     WHERE bv.shopify_bundle_id IS NULL
         AND bv.emma_id IS NULL
+-- Finds all product variants outside of bundles
 )
 SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_product_id,
     pv.product_id AS shopify_product_id,
@@ -57,6 +62,8 @@ SELECT CAST(COALESCE(p.product_id, pv.emma_product_id) AS number) AS emma_produc
 FROM product_variants pv FULL OUTER JOIN {{ ref("int_infotrax__products") }} p ON pv.sku = p.sku
     LEFT JOIN product_tag pt ON pv.product_id = pt.product_id
 WHERE p.skuable_type = 'Product'
+-- Combines both EMMA and Shopify products into one table
+-- Organizes table into it's final format
 
 
 
