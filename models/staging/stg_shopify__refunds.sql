@@ -1,3 +1,4 @@
+-- Tracks shopify refunds and links these refunds to a official transaction
 WITH refunds AS(SELECT id,
                 created_at::timestamp_ntz,
                 processed_at::timestamp_ntz,
