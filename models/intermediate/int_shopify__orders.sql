@@ -1,9 +1,13 @@
+-- Creates view that grabs and transforms Shopify order information
+-- The reason for this being so complex was because there were several errors from Fivetran that did not match the actual order amount
+
 WITH sale_transactions AS(SELECT DISTINCT(order_id),
                             SUM(amount) AS total_sale_transaction
                         FROM {{ source('shopify_raw', 'TRANSACTION') }}
                         WHERE status = 'success'
                             AND kind = 'sale'
                         GROUP BY order_id
+-- Grabs all transaction information that were successful and resulted in a sale
 ),
 refund_transactions AS(SELECT DISTINCT(order_id),
                             SUM(amount) AS total_refund_transaction
@@ -11,6 +15,7 @@ refund_transactions AS(SELECT DISTINCT(order_id),
                         WHERE status = 'success'
                             AND kind = 'refund'
                         GROUP BY order_id
+-- Grabs all transaction information that were successful and resulted in a refund
 ),
 order_transaction AS(SELECT DISTINCT(o.id),
                         (CASE 
@@ -23,13 +28,15 @@ order_transaction AS(SELECT DISTINCT(o.id),
                         END) AS order_refund
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN sale_transactions st ON o.id = st.order_id
                     LEFT JOIN refund_transactions rt ON o.id = rt.order_id
+-- Combines sales transactions and refund transactions into one CTE
 ),
 order_invoice AS(SELECT DISTINCT(o.id),
                     o.order_number,
                     o.financial_status,
                     ot.order_invoice,
                     ot.order_refund
-                FROM order_transaction ot RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON ot.id = o.id                
+                FROM order_transaction ot RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON ot.id = o.id
+-- Creates the order invoice CTE that contains the order number of the order                
 ),
 order_line_cond AS(SELECT DISTINCT(o.id),
                         (CASE
@@ -38,6 +45,8 @@ order_line_cond AS(SELECT DISTINCT(o.id),
                         END)AS line_item_subtotal
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
                     GROUP BY o.id
+-- Creates the subtotal amount of the order
+-- Is calculated by summing the value of all the products for the order prior to taxes/order level discounts
 ),
 order_line_refund_cond AS(SELECT DISTINCT(o.id),
                         (CASE
@@ -51,6 +60,7 @@ order_line_refund_cond AS(SELECT DISTINCT(o.id),
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
                     LEFT JOIN {{ ref('int_shopify__order_line_refund') }} olr ON ol.id = olr.order_line_id
                     GROUP BY o.id
+-- Calculates subtotal and tax refunds
 ),
 order_discount AS(SELECT DISTINCT(o.id),
                     (CASE
@@ -59,6 +69,7 @@ order_discount AS(SELECT DISTINCT(o.id),
                     END) AS total_discount_amount
                     FROM {{ source('shopify_raw', 'ORDER_DISCOUNT_CODE') }} odc RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON odc.order_id = o.id
                     GROUP BY o.id
+-- Calculates the total discount for an order
 ),
 shipping_amount AS(SELECT DISTINCT(o.id),
                         (CASE
@@ -67,6 +78,7 @@ shipping_amount AS(SELECT DISTINCT(o.id),
                         END) AS total_shipping_amount
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_SHIPPING_LINE') }} osl ON o.id = osl.order_id
                     GROUP BY o.id
+-- Calculates the shipping amount for an order
 ),
 shipping_tax_amount AS(SELECT DISTINCT(o.id),
                         (CASE
@@ -76,6 +88,7 @@ shipping_tax_amount AS(SELECT DISTINCT(o.id),
                     FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_SHIPPING_LINE') }} osl ON o.id = osl.order_id
                         LEFT JOIN {{ source('shopify_raw', 'ORDER_SHIPPING_TAX_LINE') }} ostl ON osl.id = ostl.order_shipping_line_id
                     GROUP BY o.id
+-- Calculates the shipping tax amount for an order
 ),
 tax_lines_cond AS(SELECT DISTINCT(o.id),
                     (CASE
@@ -85,6 +98,7 @@ tax_lines_cond AS(SELECT DISTINCT(o.id),
                 FROM {{ source('shopify_raw', '"ORDER"') }} o LEFT JOIN {{ source('shopify_raw', 'ORDER_LINE') }} ol ON o.id = ol.order_id
                     LEFT JOIN {{ source('shopify_raw', 'TAX_LINE') }} tl ON ol.id = tl.order_line_id
                 GROUP BY o.id
+-- Calculates total tax amount for an order
 ),
 order_adjustment_shipping AS(SELECT DISTINCT(o.id),
                         (CASE
@@ -98,6 +112,8 @@ order_adjustment_shipping AS(SELECT DISTINCT(o.id),
                         FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                         WHERE kind = 'shipping_refund'
                         GROUP BY o.id, oa.kind
+-- Calculates order adjustments in reference to shipping for an order
+-- Main order adjustments are shipping refunds and shipping tax refunds
 ),
 order_adjustment_cond AS(SELECT DISTINCT(o.id),
                         (CASE
@@ -111,6 +127,7 @@ order_adjustment_cond AS(SELECT DISTINCT(o.id),
                     FROM {{ source('shopify_raw', 'ORDER_ADJUSTMENT') }} oa RIGHT JOIN {{ source('shopify_raw', '"ORDER"') }} o ON oa.order_id = o.id
                     WHERE kind <> 'shipping_refund'
                     GROUP BY o.id, oa.kind
+-- Calculates order adjustments for an order
 ),
 order_tag AS(
     SELECT DISTINCT(order_id) AS order_id,
@@ -121,12 +138,16 @@ order_tag AS(
     END) AS order_tag_type
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
 WHERE value IN ('Subscription First Order', 'Subscription Recurring Order', 'Enrollment Order')
+-- Grabs necessary order tags for an order
+-- Only include order tags that pertain to subscriptions and enrollment orders, such as business kit purchases
 ),
 order_tag_cond AS(
     SELECT order_id,
         ARRAY_AGG(order_tag_type) AS order_tag_type
     FROM order_tag
     GROUP BY order_id
+-- Combines all order tags and puts them into an array
+-- We do this because multiple tags can be put into one order
 ),
 redeemed_pop_up AS(
     SELECT DISTINCT(order_id) AS order_id,
@@ -136,6 +157,7 @@ redeemed_pop_up AS(
     END) AS redeemed_pop_up_reward
 FROM {{ source("shopify_raw", 'ORDER_TAG') }}
 WHERE value ='Pop-Up Code'
+-- Creates boolean to see if a pop up code was redeemed on an order
 ),
 distributor_status_metafield AS(
     SELECT DISTINCT(owner_id) AS order_id,
@@ -146,17 +168,21 @@ distributor_status_metafield AS(
     END) AS distributor_status
 FROM {{ source('shopify_raw', 'METAFIELD') }}
 WHERE value IN ('Consumer Order', 'Distributor Order', 'Affiliate Order')
+-- Attaches distributor status to the order
+-- This is the historical distributor status. Essentially, this is the status of the customer/distributor at their time or purchase
 ),
 pv_qual_field AS(
     SELECT DISTINCT(owner_id) AS order_id,
         ROUND(value, 2)*100 AS pv_qualifying_amount
     FROM {{ source('shopify_raw', 'METAFIELD') }} 
     WHERE key = 'pv_qualifying_amount'
+-- Attaches PV Qualifying Amount field to the order
 ),
 customers AS(
     SELECT shopify_customer_id,
         brand_ambassador_id
     FROM {{ ref('shopify_distributors') }}
+-- Creates CTE that contains the Shopify Customer ID and their Infotrax BA ID
 )
 SELECT DISTINCT(oi.id) AS order_id,
     oi.order_number,
@@ -227,7 +253,6 @@ SELECT DISTINCT(oi.id) AS order_id,
     COALESCE(REGEXP_SUBSTR(note_attributes, '"name"\s*:\s*"PartyWebAlias"\s*,\s*"order_id"\s*:\s*null\s*,\s*"value"\s*:\s*"([^"]*)"', 1, 1, 'i', 1), 'NONE') AS partywebalias,
     o.note_attributes,
     o.client_details_user_agent,
-    --Edit the splits once I find out more information on how notes/comments are inputted
     SPLIT_PART(SPLIT_PART(o.note, '\n', 2), ':', 2) AS sphere_order_number_reference,
     SPLIT_PART(SPLIT_PART(o.note, '\n', 3), ':', 2) AS infotrax_order_number_reference,
     o.test,
@@ -248,3 +273,4 @@ FROM order_invoice oi JOIN order_line_cond olc ON oi.id = olc.id
     LEFT JOIN customers c ON o.customer_id = c.shopify_customer_id
     LEFT JOIN pv_qual_field pvq ON oi.id = pvq.order_id
 WHERE o._fivetran_deleted = FALSE
+-- Organizes order table into its final format
