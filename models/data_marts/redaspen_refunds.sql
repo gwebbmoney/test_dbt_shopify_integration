@@ -4,6 +4,7 @@
 
 {{ config(schema = 'transaction_metrics')}}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH data_union AS({{dbt_utils.union_relations(
     relations = [ref('stg_shopify__refunds'), ref('stg_infotrax__refunds')]
 )}}

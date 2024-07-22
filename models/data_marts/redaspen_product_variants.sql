@@ -2,6 +2,7 @@
 
 {{ config(schema = 'products')}}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH products AS(
     SELECT * FROM {{ ref("int_shopify__products") }}
 ),

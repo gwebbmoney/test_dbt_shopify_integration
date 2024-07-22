@@ -4,6 +4,7 @@
 
 {{ config(schema = 'orders')}}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH orders AS(
     SELECT * FROM {{ ref("redaspen_orders") }}
 )

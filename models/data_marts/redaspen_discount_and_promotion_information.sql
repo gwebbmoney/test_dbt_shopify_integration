@@ -4,6 +4,7 @@
 
 {{ config(schema = 'discounts_and_promotions')}}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH price_rule AS(SELECT id,
                     created_at,
                     starts_at,

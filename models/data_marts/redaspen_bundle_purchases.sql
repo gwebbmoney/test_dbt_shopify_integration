@@ -2,6 +2,7 @@
 
 {{ config(schema = 'bundles') }}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH infotrax_array AS(SELECT ol.bundle_properties[0]['bundle_order_line_id'] AS bundle_order_line_id,
     ol.order_id,
     ARRAY_AGG(sku) AS product_sku_array

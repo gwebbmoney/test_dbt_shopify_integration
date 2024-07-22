@@ -2,6 +2,8 @@
 
 {{ config(schema = 'bundles') }}
 
+
+-- NOTE: THIS TABLE IS NOT WORKING. REVIEW FOR BROOKLYN DATA
 WITH infotrax_array AS(SELECT ol.bundle_properties[0]['bundle_order_line_id'] AS bundle_order_line_id,
     ol.order_id,
     ARRAY_AGG(sku) AS product_sku_array

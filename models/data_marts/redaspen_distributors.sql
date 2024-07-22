@@ -2,6 +2,7 @@
 
 {{ config(schema = 'distributors')}}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH shopify_customers AS(
     SELECT * FROM {{ ref("int_shopify__customers") }}
 ),

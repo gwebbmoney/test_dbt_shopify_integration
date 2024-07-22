@@ -4,6 +4,7 @@
 
 {{ config(schema = 'discounts_and_promotions')}}
 
+-- NOTE: DO NOT USE. DATABASE NOT IN SNOWFLAKE ANYMORE
 WITH discount_code AS(SELECT order_id,    
                         index,
                         code AS order_discount_code,
