@@ -1,7 +1,7 @@
 -- Tracks shopify refunds and links these refunds to a official transaction
 WITH refunds AS(SELECT id,
-                created_at::timestamp_ntz,
-                processed_at::timestamp_ntz,
+                CONVERT_TIMEZONE('America/Boise', created_at) as created_at,
+                CONVERT_TIMEZONE('America/Boise', processed_at) as processed_at,
                 note,
                 restock,
                 order_id
@@ -11,12 +11,12 @@ transactions AS(SELECT id,
                 order_id,
                 refund_id,
                 amount*100 AS refund_amount_cents,
-                created_at::timestamp_ntz AS refunded_at,
-                processed_at::timestamp_ntz AS processed_at
+                CONVERT_TIMEZONE('America/Boise', created_at) AS refunded_at,
+                CONVERT_TIMEZONE('America/Boise', processed_at) AS processed_at
             FROM {{ source('shopify_raw', 'TRANSACTION') }}
             WHERE kind = 'refund'
                 AND status = 'success'
-                --AND test = FALSE
+                AND test = FALSE
 )
 SELECT t.order_id, 
     r.id AS refund_id,
