@@ -89,6 +89,10 @@ bundle_product_lines AS(SELECT bpo.infotrax_order_number,
         WHEN bpo.kit_line = 0 AND bpo.skuable_type = 'Bundle' THEN bpo.infotrax_sku
         WHEN bpo.kit_line = 0 AND bpo.skuable_type = 'Product' THEN bpo.infotrax_sku
     END) AS bundle_sku,
+    (CASE
+        WHEN bundle_sku IS NOT NULL THEN bpo.id
+        ELSE NULL
+    END) AS bundle_order_line_null,
     bpo.skuable_type,
     bpo.distributor_status,
     bpo.entered_at
@@ -107,7 +111,10 @@ bundle_components AS(SELECT bpl.infotrax_order_number,
                     bpl.promo_id,
                 (CASE WHEN bpl.kit_line > 0 THEN LAG(bundle_sku) IGNORE NULLS OVER (PARTITION BY infotrax_order_number ORDER BY order_line)
                     WHEN bpl.kit_line = 0 THEN bundle_sku
-                END) AS bundle_product_number
+                END) AS bundle_product_number,
+                (CASE WHEN bpl.kit_line > 0 THEN LAG(bpl.bundle_order_line_null) IGNORE NULLS OVER (PARTITION BY infotrax_order_number ORDER BY order_line)
+                    WHEN bpl.kit_line = 0 THEN bpl.id
+                END) AS bundle_order_line
 FROM bundle_product_lines bpl
 --For each product purchased within a bundle, the bundle sku is associated with each product.
 --Example: Bundle Sku = 1000, and Products A and B are within this bundle purchase. The bundle sku of A and B are now 1000.
@@ -237,16 +244,17 @@ FROM bundle_product_lines bpl JOIN product_pricing_percentages ppp ON bpl.infotr
     AND bpl.order_line = ppp.order_line
 )
 SELECT order_line_id,
-    infotrax_order_number,
-    line_item_sku,
-    bundle_product_number,
-    skuable_type,
+    bpl.infotrax_order_number,
+    bc.bundle_order_line,
+    bc.line_item_sku,
+    bpl.bundle_product_number,
+    bpl.skuable_type,
     product_name,
-    kit_line,
-    order_line,
+    bpl.kit_line,
+    bpl.order_line,
     distributor_status,
     entered_at,
-    promo_id,
+    bpl.promo_id,
     retail_amount_cents,
     emma_price_cents,
     quantity_ordered,
@@ -255,6 +263,6 @@ SELECT order_line_id,
     price_allocation_percentage,
     bundle_product_allocation_revenue_cents,
     component_status
-FROM bundle_order_lines
+FROM bundle_order_lines bpl LEFT JOIN bundle_components bc ON bpl.order_line_id = bc.id
 ORDER BY infotrax_order_number, order_line
 --Organizes bundle order lines into it's final format
