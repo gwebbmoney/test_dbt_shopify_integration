@@ -246,7 +246,7 @@ FROM bundle_product_lines bpl JOIN product_pricing_percentages ppp ON bpl.infotr
 SELECT order_line_id,
     bpl.infotrax_order_number,
     bc.bundle_order_line,
-    bc.line_item_sku,
+    line_item_sku,
     bpl.bundle_product_number,
     bpl.skuable_type,
     product_name,
