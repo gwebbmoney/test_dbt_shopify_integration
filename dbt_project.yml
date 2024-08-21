@@ -6,7 +6,7 @@ version: '1.0.0'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'default'
+profile: 'shopify_integration'
 
 # These configurations specify where dbt should look for different types of files.
 # The `source-paths` config, for example, states that models in this project can be
@@ -23,6 +23,8 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
+vars:
+  production_target_names: ['production', 'prod']
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
@@ -35,5 +37,32 @@ models:
     +materialized: view
     data_marts:
       +materialized: table
+      +schema: core
+      bundles:
+        +schema: bundles
+      distributors:
+        +schema: distributors
+      orders:
+        +schema: orders
+      products:
+        +schema: products
+      transaction_metrics:
+        +schema: transaction_metrics
+    deprecated_marts:
+      +materialized: table
+      +database: redaspen_v2
+      +schema: core
+      +enabled: false
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    staging:
+      +materialized: view
+      +schema: sources
+
+seeds:
+  +schema: seeds
+  +quote_columns: false
+    
 
     
