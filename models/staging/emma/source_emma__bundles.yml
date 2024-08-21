@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: source_emma__bundles
+    description: ""
+
+    columns:
+      # Primary key
+      - name: id
+        data_type: number
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: status_id
+        data_type: number
+        description: ""
+
+      - name: created_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: updated_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: go_live
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: bundle_title
+        data_type: varchar
+        description: ""
+
+      - name: price
+        data_type: number
+        description: ""
+
+      - name: pv
+        data_type: number
+        description: ""
+
+      - name: value
+        data_type: number
+        description: ""

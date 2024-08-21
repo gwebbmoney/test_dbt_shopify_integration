@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: source_emma__categories
+    description: ""
+
+    columns:
+      # Primary key
+      - name: id
+        data_type: number
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: created_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: updated_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: product_type
+        data_type: varchar
+        description: ""

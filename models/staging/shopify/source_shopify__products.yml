@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: source_shopify__products
+    description: ""
+
+    columns:
+      # Primary Key
+      - name: id
+        data_type: number
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: created_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: updated_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: published_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: fivetran_synced_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: product_title
+        data_type: varchar
+        description: ""
+
+      - name: product_type
+        data_type: varchar
+        description: ""
+
+      - name: status
+        data_type: varchar
+        description: ""

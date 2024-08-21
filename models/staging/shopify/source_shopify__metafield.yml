@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: source_shopify__metafield
+    description: ""
+
+    columns:
+      # Primary Key
+      - name: id
+        data_type: number
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: owner_id
+        data_type: number
+        description: ""
+
+      - name: created_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: updated_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: fivetran_synced_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: key
+        data_type: varchar
+        description: ""
+
+      - name: value
+        data_type: varchar
+        description: ""
+
+      - name: owner_resource
+        data_type: varchar
+        description: ""

@@ -1,0 +1,8 @@
+version: 2
+    
+sources:
+  - name: normalized_snowflake
+    database: redaspen
+    schema: products
+    tables:
+      - name: products

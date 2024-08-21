@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: source_emma__skus
+    description: ""
+    
+    columns:
+      # Primary key
+      - name: id
+        data_type: number
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: skuable_id
+        data_type: number
+        description: ""
+
+      - name: fivetran_synced_at
+        data_type: timestamp_tz
+        description: ""
+
+      - name: sku
+        data_type: varchar
+        description: ""
+
+      - name: skuable_type
+        data_type: varchar
+        description: ""

@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: source_shopify__product_tag
+    description: |
+      Product Tag information extracted from shopify. Needed to identify bundles.
+
+    columns:
+      # Primary key
+      - name: id
+        description: "Unique identifier."
+        tests:
+          - not_null
+          - unique
+
+      # Foreign keys and IDs
+      - name: product_id
+        description: XXXXXXXX
+
+      - name: index
+        description: XXXXXXXX
+
+      # Timestamps
+      - name: fivetran_synced_at
+        description: Indicates the time when Fivetran last successfully synced the row.
+
+      # Status and properties
+      - name: product_tag
+        description: Tag identifier for the combination of product_id and index.

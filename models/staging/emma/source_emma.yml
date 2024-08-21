@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+ 
+  - name: emma
+    database: fivetran_emma_raw_data
+    schema: emma_heroku_postgres_public
+    tables:
+      - name: bundles
+      - name: categories
+      - name: products
+      - name: sub_categories
+      - name: skus

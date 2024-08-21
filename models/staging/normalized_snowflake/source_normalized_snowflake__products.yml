@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: source_normalized_snowflake__products
+    description: ""
+
+    columns:
+      # Primary key
+      - name: id
+        data_type: number
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: style_id
+        data_type: number
+        description: ""
+
+      - name: length_id
+        data_type: number
+        description: ""
+
+      - name: shape_id
+        data_type: number
+        description: ""
+
+      - name: volume_id
+        data_type: number
+        description: ""
+
+      - name: status_id
+        data_type: number
+        description: ""
+
+      - name: category_id
+        data_type: number
+        description: ""
+
+      - name: sub_category_id
+        data_type: number
+        description: ""
+
+      - name: updated_at
+        data_type: timestamp_ntz
+        description: ""
+
+      - name: is_component
+        data_type: boolean
+        description: ""
+
+      - name: product_title
+        data_type: varchar
+        description: ""
+
+      - name: seasonality
+        data_type: varchar
+        description: ""
+
+      - name: collection
+        data_type: varchar
+        description: ""
+
+      - name: style
+        data_type: varchar
+        description: ""
+
+      - name: length
+        data_type: varchar
+        description: ""
+
+      - name: shape
+        data_type: varchar
+        description: ""
+
+      - name: design
+        data_type: varchar
+        description: ""
+
+      - name: volume
+        data_type: varchar
+        description: ""
+
+      - name: status
+        data_type: varchar
+        description: ""
+
+      - name: finish
+        data_type: varchar
+        description: ""
+
+      - name: price
+        data_type: number
+        description: ""
+
+      - name: pv
+        data_type: number
+        description: ""
