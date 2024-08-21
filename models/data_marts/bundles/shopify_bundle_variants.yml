@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: shopify_bundle_variants
+    description: ""
+
+    columns:
+      # Primary key
+      - name: id
+        data_type: varchar
+        description: ""
+        tests:
+          - not_null
+          - unique
+
+      - name: emma_id
+        data_type: number
+        description: ""
+
+      - name: shopify_bundle_id
+        data_type: number
+        description: ""
+
+      - name: shopify_bundle_variant_id
+        data_type: number
+        description: ""
+
+      - name: bundle_title
+        data_type: varchar
+        description: ""
+
+      - name: shopify_bundle_title
+        data_type: varchar
+        description: ""
+
+      - name: shopify_bundle_variant_title
+        data_type: varchar
+        description: ""
+
+      - name: bundle_category_type
+        data_type: varchar
+        description: ""
+
+      - name: sku
+        data_type: varchar
+        description: ""
+
+      - name: bundle_type
+        data_type: varchar
+        description: ""
+
+      - name: bundle_source
+        data_type: varchar
+        description: ""
